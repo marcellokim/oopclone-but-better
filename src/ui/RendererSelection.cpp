@@ -33,26 +33,26 @@ void Renderer::drawSelectionHero(sf::RenderTarget& target, const SelectionLayout
              false,
              1.18F);
     drawText(target,
-             "Choose your doctrine\nand seize the table.",
+             "Choose\nyour doctrine\nand seize the table.",
              {layout.heroRect.position.x + 28.F, layout.heroRect.position.y + 92.F},
-             40,
+             34,
              detail::kTextPrimary,
              FontRole::Display,
              false,
              0.92F);
     drawText(target,
-             "Each nation bends the same battlefield toward speed, force, attrition, or macro control.",
+             "Each nation bends the same battlefield toward\nspeed, force, attrition, or macro control.",
              {layout.heroRect.position.x + 30.F, layout.heroRect.position.y + 212.F},
-             18,
+             16,
              detail::kTextMuted,
              FontRole::Body,
              false,
              0.98F);
 
     const std::array<std::string, 3> bullets{{
-        "Mouse-first controls with keyboard send-ratio shortcuts.",
-        "Capitals regenerate faster as your territory grows.",
-        "Capital loss or total force collapse ends the war immediately.",
+        "Mouse-first commands. Ratios on 1 / 2 / 3.",
+        "Capitals regenerate faster as territory grows.",
+        "Lose your capital or your entire force and the table is gone.",
     }};
     float bulletY = layout.heroRect.position.y + 314.F;
     for (const auto& bullet : bullets) {
@@ -142,39 +142,39 @@ void Renderer::drawSelectionNationCards(sf::RenderTarget& target,
         drawText(target,
                  detail::doctrineLine(nation),
                  {rect.position.x + 34.F, rect.position.y + 116.F},
-                 16,
+                 15,
                  detail::kTextMuted,
                  FontRole::Body);
 
         drawChip(target,
-                 detail::makeRect(rect.position.x + 34.F, rect.position.y + rect.size.y - 86.F, 72.F, 30.F),
+                 detail::makeRect(rect.position.x + 34.F, rect.position.y + rect.size.y - 98.F, 94.F, 24.F),
                  "mob " + std::to_string(profile.mobility).substr(0, 4),
                  detail::withAlpha(nationAccent, 44),
                  detail::kTextPrimary,
                  FontRole::Mono);
         drawChip(target,
-                 detail::makeRect(rect.position.x + 116.F, rect.position.y + rect.size.y - 86.F, 72.F, 30.F),
+                 detail::makeRect(rect.position.x + 142.F, rect.position.y + rect.size.y - 98.F, 94.F, 24.F),
                  "atk " + std::to_string(profile.attack).substr(0, 4),
                  detail::withAlpha(nationAccent, 38),
                  detail::kTextPrimary,
                  FontRole::Mono);
         drawChip(target,
-                 detail::makeRect(rect.position.x + 198.F, rect.position.y + rect.size.y - 86.F, 72.F, 30.F),
+                 detail::makeRect(rect.position.x + 34.F, rect.position.y + rect.size.y - 66.F, 94.F, 24.F),
                  "def " + std::to_string(profile.defense).substr(0, 4),
                  detail::withAlpha(nationAccent, 34),
                  detail::kTextPrimary,
                  FontRole::Mono);
         drawChip(target,
-                 detail::makeRect(rect.position.x + 280.F, rect.position.y + rect.size.y - 86.F, 72.F, 30.F),
+                 detail::makeRect(rect.position.x + 142.F, rect.position.y + rect.size.y - 66.F, 94.F, 24.F),
                  "reg " + std::to_string(profile.regen).substr(0, 4),
                  detail::withAlpha(nationAccent, 30),
                  detail::kTextPrimary,
                  FontRole::Mono);
 
         drawText(target,
-                 "Press " + std::to_string(index + 1) + " or click to command this doctrine.",
-                 {rect.position.x + 34.F, rect.position.y + rect.size.y - 40.F},
-                 15,
+                 "Press " + std::to_string(index + 1) + " or click to deploy this doctrine.",
+                 {rect.position.x + 34.F, rect.position.y + rect.size.y - 34.F},
+                 13,
                  highlighted ? detail::kTextPrimary : detail::kTextMuted,
                  FontRole::Body);
     }
@@ -189,7 +189,7 @@ void Renderer::drawSelectionFooter(sf::RenderTarget& target, const SelectionLayo
     drawText(target,
              "Controls: left click select/command | right click or Esc to clear | capitals regenerate with territory held.",
              {layout.footerRect.position.x + 28.F, layout.footerRect.position.y + 20.F},
-             15,
+             14,
              detail::kTextMuted,
              FontRole::Body);
 }

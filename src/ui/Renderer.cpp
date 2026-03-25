@@ -170,12 +170,12 @@ void Renderer::drawChip(sf::RenderTarget& target,
 
 Renderer::SelectionLayout Renderer::selectionLayout() const {
     return {
-        .heroRect = detail::makeRect(58.F, 84.F, 360.F, 590.F),
+        .heroRect = detail::makeRect(58.F, 84.F, 338.F, 590.F),
         .nationCards = {{
-            detail::makeRect(452.F, 96.F, 326.F, 250.F),
-            detail::makeRect(806.F, 72.F, 360.F, 214.F),
-            detail::makeRect(442.F, 382.F, 350.F, 286.F),
-            detail::makeRect(822.F, 326.F, 372.F, 296.F),
+            detail::makeRect(438.F, 96.F, 336.F, 258.F),
+            detail::makeRect(798.F, 74.F, 370.F, 248.F),
+            detail::makeRect(432.F, 372.F, 360.F, 296.F),
+            detail::makeRect(808.F, 320.F, 382.F, 308.F),
         }},
         .footerRect = detail::makeRect(58.F, 696.F, 1136.F, 58.F),
     };
@@ -189,8 +189,8 @@ Renderer::MatchLayout Renderer::matchLayout(const sim::WorldState& world) const 
     layout.rightRail = detail::makeRect(910.F, 118.F, 336.F, 626.F);
     layout.commanderPanel = detail::makeRect(926.F, 134.F, 304.F, 106.F);
     layout.hoverPanel = detail::makeRect(926.F, 256.F, 304.F, 198.F);
-    layout.frontsPanel = detail::makeRect(926.F, 470.F, 304.F, 206.F);
-    layout.objectivePanel = detail::makeRect(926.F, 692.F, 304.F, 44.F);
+    layout.frontsPanel = detail::makeRect(926.F, 470.F, 304.F, 198.F);
+    layout.objectivePanel = detail::makeRect(926.F, 684.F, 304.F, 44.F);
     layout.bottomChip = detail::makeRect(90.F, 650.F, 492.F, 74.F);
 
     const float availableTileWidth = layout.mapViewport.size.x - 28.F;

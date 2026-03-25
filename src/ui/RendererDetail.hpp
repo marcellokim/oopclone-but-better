@@ -130,6 +130,22 @@ inline std::string doctrineLine(const NationId nation) {
     return {};
 }
 
+inline std::string compactNationName(const NationId nation) {
+    switch (nation) {
+    case NationId::SwiftLeague:
+        return "Swift";
+    case NationId::IronLegion:
+        return "Iron";
+    case NationId::BastionDirectorate:
+        return "Bastion";
+    case NationId::CrownConsortium:
+        return "Crown";
+    case NationId::Neutral:
+        return "Neutral";
+    }
+    return {};
+}
+
 inline std::string doctrineTag(const NationId nation) {
     switch (nation) {
     case NationId::SwiftLeague:

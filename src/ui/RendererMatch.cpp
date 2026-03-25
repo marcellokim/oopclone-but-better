@@ -309,7 +309,7 @@ void Renderer::drawFrontsPanel(sf::RenderTarget& target, const MatchLayout& layo
         const auto panelRect = detail::makeRect(layout.frontsPanel.position.x + 14.F,
                                                 frontY,
                                                 layout.frontsPanel.size.x - 28.F,
-                                                34.F);
+                                                32.F);
         sf::RectangleShape strip({panelRect.size.x, panelRect.size.y});
         strip.setPosition(panelRect.position);
         strip.setFillColor(detail::withAlpha(detail::mix(detail::kCore, nationColor(nation), alive ? 0.18F : 0.05F), 210));
@@ -317,25 +317,25 @@ void Renderer::drawFrontsPanel(sf::RenderTarget& target, const MatchLayout& layo
         strip.setOutlineColor(detail::withAlpha(nationColor(nation), alive ? 120 : 50));
         target.draw(strip);
         drawText(target,
-                 std::string(nationName(nation)),
-                 {panelRect.position.x + 12.F, panelRect.position.y + 6.F},
-                 14,
+                 detail::compactNationName(nation),
+                 {panelRect.position.x + 12.F, panelRect.position.y + 5.F},
+                 13,
                  alive ? detail::kTextPrimary : detail::kTextMuted,
                  FontRole::Body);
         drawText(target,
                  "tiles " + std::to_string(sim::ownedTileCount(world, nation)) + " | troops " +
                      std::to_string(sim::totalTroops(world, nation)),
-                 {panelRect.position.x + 12.F, panelRect.position.y + 19.F},
-                 11,
+                 {panelRect.position.x + 12.F, panelRect.position.y + 17.F},
+                 10,
                  detail::kTextMuted,
                  FontRole::Mono);
         drawChip(target,
-                 detail::makeRect(panelRect.position.x + panelRect.size.x - 78.F, panelRect.position.y + 6.F, 68.F, 16.F),
+                 detail::makeRect(panelRect.position.x + panelRect.size.x - 66.F, panelRect.position.y + 5.F, 56.F, 15.F),
                  detail::compactStandingStatus(alive, player),
                  detail::withAlpha(alive ? (player ? detail::kAccent : detail::kPositive) : detail::kNegative, 42),
                  alive ? (player ? detail::kAccent : detail::kPositive) : detail::kNegative,
                  FontRole::Mono);
-        frontY += 40.F;
+        frontY += 36.F;
     }
 }
 
@@ -346,17 +346,17 @@ void Renderer::drawObjectivePanel(sf::RenderTarget& target, const MatchLayout& l
               detail::withAlpha(detail::kCore, 242),
               detail::withAlpha(detail::kBorder, 140));
     drawText(target,
-             "WIN / LOSE",
-             {layout.objectivePanel.position.x + 18.F, layout.objectivePanel.position.y + 18.F},
-             13,
+             "OBJECTIVE",
+             {layout.objectivePanel.position.x + 18.F, layout.objectivePanel.position.y + 14.F},
+             12,
              detail::kAccent,
              FontRole::Mono,
              false,
              1.16F);
     drawText(target,
-             "Capture capitals or erase total enemy force. Lose your capital and the table is gone.",
-             {layout.objectivePanel.position.x + 18.F, layout.objectivePanel.position.y + 40.F},
-             12,
+             "Hold capital. Take capitals. Erase force.",
+             {layout.objectivePanel.position.x + 18.F, layout.objectivePanel.position.y + 26.F},
+             10,
              detail::kTextMuted,
              FontRole::Body);
 }
