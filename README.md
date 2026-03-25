@@ -51,6 +51,23 @@ cmake --build build -j4 --target territory_war territory_war_tests
 ctest --test-dir build --output-on-failure
 ```
 
+## 실제 플레이테스트 모드
+실제 사람 기준 UI/가독성 점검을 빠르게 시작하려면 아래 스크립트를 사용하세요.
+
+```bash
+./tools/start_playtest.sh
+```
+
+앱을 자동 실행하지 않고 리포트만 만들려면:
+
+```bash
+./tools/start_playtest.sh --no-launch
+```
+
+생성 위치:
+- `docs/playtest-runs/playtest-<timestamp>.md`
+- `docs/playtest-ui-balance-checklist.md`
+
 ## 오프스크린 프리뷰 렌더
 UI 점검용 preview 이미지를 생성할 수 있습니다.
 
