@@ -35,7 +35,7 @@ std::vector<std::string> buildHoverLines(const sim::WorldState& world,
     std::vector<std::string> lines;
     lines.push_back("Tile (" + std::to_string(coord.x) + ", " + std::to_string(coord.y) + ") | " +
                     std::string(terrainName(tile.terrain)));
-    lines.push_back(std::string("Owner: ") + std::string(nationName(tile.owner)) + " | troops " + std::to_string(tile.troops));
+    lines.push_back(std::string("Owner: ") + std::string(nationCompactName(tile.owner)) + " | troops " + std::to_string(tile.troops));
 
     if (tile.hasCapital) {
         const float regenRate = config.baseRegenPerSecond +

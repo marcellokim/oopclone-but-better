@@ -57,8 +57,8 @@ TEST_CASE(renderer_selection_hit_testing_matches_doctrine_cards) {
 
 TEST_CASE(renderer_player_facing_names_follow_university_retheme) {
     const auto nations = game::playableNations();
-    const std::array<std::string_view, 4> expectedNames{{"서강대학교", "한양대학교", "성균관대학교", "중앙대학교"}};
-    const std::array<std::string_view, 4> expectedCompact{{"서강", "한양", "성균관", "중앙"}};
+    const std::array<std::string_view, 4> expectedNames{{"Sogang Univ.", "Hanyang Univ.", "Sungkyunkwan Univ.", "Chung-Ang Univ."}};
+    const std::array<std::string_view, 4> expectedCompact{{"Sogang", "Hanyang", "SKKU", "Chung-Ang"}};
     const std::array<std::string_view, 4> expectedTags{{"tempo doctrine", "infrastructure doctrine", "stability doctrine", "adaptive doctrine"}};
 
     for (std::size_t index = 0; index < nations.size(); ++index) {
@@ -84,8 +84,8 @@ TEST_CASE(renderer_hover_lines_surface_university_names_and_new_terrain_labels) 
     probeTile.terrain = *mountain;
 
     const auto mountainLines = game::ui::buildHoverLines(world, {5, 5});
-    test::require(hasLineContaining(mountainLines, "Owner: 서강대학교"),
-                  "hover intel should show the renamed university owner label");
+    test::require(hasLineContaining(mountainLines, "Owner: Sogang"),
+                  "hover intel should show the compact English owner label");
     test::require(hasLineContaining(mountainLines, "Mountain"),
                   "hover intel should surface Mountain in the tile summary");
     test::require(hasLineContaining(mountainLines, "Move:"),

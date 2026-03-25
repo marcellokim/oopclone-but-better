@@ -5,7 +5,7 @@ The goal is to keep the new terrain semantics deterministic while making the uni
 
 ## Scope
 - New terrain semantics: `Mountain`, `Sea`, existing `Road` / `Plains` / `Highland` / `Capital`
-- University faction retheme: `서강대학교`, `성균관대학교`, `한양대학교`, `중앙대학교`
+- University faction retheme display names: `Sogang Univ.`, `Hanyang Univ.`, `Sungkyunkwan Univ.`, `Chung-Ang Univ.`
 - Deterministic orthogonal pathing and terrain bottleneck launch rules
 - Handcrafted map readability and non-rectangular starting regions
 

@@ -84,7 +84,7 @@ void App::draw() {
                 const auto coord = *m_world.hoveredTile;
                 const auto& tile = sim::tileAt(m_world, coord);
                 title += " | Hover (" + std::to_string(coord.x) + "," + std::to_string(coord.y) + ") " +
-                         std::string(nationName(tile.owner)) + " troops=" + std::to_string(tile.troops);
+                         std::string(nationCompactName(tile.owner)) + " troops=" + std::to_string(tile.troops);
             }
             m_window.setTitle(title);
         } else if (m_scene == Scene::GameOver) {

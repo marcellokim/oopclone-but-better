@@ -141,7 +141,7 @@ inline std::string selectedTileSummary(const sim::WorldState& world) {
     const auto coord = *world.selectedTile;
     const auto& tile = sim::tileAt(world, coord);
     return "Selected tile (" + std::to_string(coord.x) + ", " + std::to_string(coord.y) + ") | " +
-           std::string(nationName(tile.owner)) + " | " + std::string(terrainName(tile.terrain)) + " | troops " +
+           std::string(nationCompactName(tile.owner)) + " | " + std::string(terrainName(tile.terrain)) + " | troops " +
            std::to_string(tile.troops) +
            (tile.hasCapital ? " | capital" : "");
 }

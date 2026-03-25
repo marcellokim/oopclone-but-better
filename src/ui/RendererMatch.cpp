@@ -104,7 +104,7 @@ void Renderer::drawMatchTopStrip(sf::RenderTarget& target,
              0.95F);
     drawChip(target,
              detail::makeRect(layout.topStrip.position.x + 548.F, layout.topStrip.position.y + 20.F, 152.F, 34.F),
-             std::string(nationName(world.playerNation)),
+             detail::compactNationName(world.playerNation),
              detail::withAlpha(nationColor(world.playerNation), 54),
              detail::kTextPrimary,
              FontRole::Body);
@@ -315,7 +315,7 @@ void Renderer::drawCommanderPanel(sf::RenderTarget& target,
              false,
              1.16F);
     drawText(target,
-             std::string(nationName(world.playerNation)),
+             detail::compactNationName(world.playerNation),
              {layout.commanderPanel.position.x + 18.F, layout.commanderPanel.position.y + 46.F},
              22,
              nationColor(world.playerNation),

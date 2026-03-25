@@ -3,7 +3,7 @@
 1. Configure and build the project with CMake.
 2. Launch `territory_war`.
 3. Verify nation select works by click and by keys 1-4.
-4. Confirm the four doctrine cards render the university names `서강대학교`, `성균관대학교`, `한양대학교`, and `중앙대학교`.
+4. Confirm the four doctrine cards render the English display names `Sogang Univ.`, `Hanyang Univ.`, `Sungkyunkwan Univ.`, and `Chung-Ang Univ.`.
 5. Hover plains / road / highland / mountain / sea / capital tiles and confirm owner / troops / terrain / capital info appears.
 6. Issue 25%, 50%, and 100% orders with keys 1/2/3 + mouse clicks.
 7. Confirm friendly moves merge troops and enemy moves trigger combat / tile capture.
