@@ -151,14 +151,13 @@ int terrainThroughputCap(const TerrainType terrain) {
     switch (terrain) {
     case TerrainType::Road:
         return 72;
-    case TerrainType::Capital:
-        return 64;
     case TerrainType::Plains:
-        return 56;
+    case TerrainType::Capital:
+        return 48;
     case TerrainType::Highland:
-        return 40;
+        return 32;
     case TerrainType::Mountain:
-        return 24;
+        return 18;
     case TerrainType::Sea:
         return 0;
     }
