@@ -11,3 +11,4 @@ cmake-build-*/
 .omx/tmux-hook.json
 .omx/drafts/
 .omx/team/
+docs/playtest-runs/
