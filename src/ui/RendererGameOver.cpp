@@ -6,9 +6,9 @@
 
 namespace game::ui {
 
-void Renderer::drawGameOver(sf::RenderWindow& window, const sim::WorldState& world) const {
-    drawMatch(window, world, InputController{});
-    drawGameOverPanel(window, world);
+void Renderer::drawGameOver(sf::RenderTarget& target, const sim::WorldState& world) const {
+    drawMatch(target, world, InputController{});
+    drawGameOverPanel(target, world);
 }
 
 void Renderer::drawGameOverPanel(sf::RenderTarget& target, const sim::WorldState& world) const {
@@ -70,9 +70,9 @@ void Renderer::drawGameOverPanel(sf::RenderTarget& target, const sim::WorldState
              detail::kTextPrimary,
              FontRole::Body);
 
-    float rowY = panel.position.y + 244.F;
+    float rowY = panel.position.y + 232.F;
     for (const auto nation : playableNations()) {
-        const auto rowRect = detail::makeRect(panel.position.x + 28.F, rowY, panel.size.x - 56.F, 42.F);
+        const auto rowRect = detail::makeRect(panel.position.x + 28.F, rowY, panel.size.x - 56.F, 38.F);
         sf::RectangleShape row({rowRect.size.x, rowRect.size.y});
         row.setPosition(rowRect.position);
         row.setFillColor(detail::withAlpha(detail::mix(detail::kCore, nationColor(nation), 0.12F), 220));
@@ -83,29 +83,29 @@ void Renderer::drawGameOverPanel(sf::RenderTarget& target, const sim::WorldState
         const bool alive = !world.nationStates.at(sim::nationIndex(nation)).eliminated;
         drawText(target,
                  std::string(nationName(nation)),
-                 {rowRect.position.x + 14.F, rowRect.position.y + 11.F},
+                 {rowRect.position.x + 14.F, rowRect.position.y + 9.F},
                  17,
                  alive ? nationColor(nation) : detail::kTextMuted,
                  FontRole::Body);
         drawText(target,
                  std::to_string(sim::ownedTileCount(world, nation)) + " tiles   " +
                      std::to_string(sim::totalTroops(world, nation)) + " troops",
-                 {rowRect.position.x + 262.F, rowRect.position.y + 11.F},
+                 {rowRect.position.x + 262.F, rowRect.position.y + 9.F},
                  15,
                  detail::kTextMuted,
                  FontRole::Mono);
         drawText(target,
                  detail::standingStatus(alive, nation == world.playerNation),
-                 {rowRect.position.x + rowRect.size.x - 128.F, rowRect.position.y + 11.F},
+                 {rowRect.position.x + rowRect.size.x - 128.F, rowRect.position.y + 9.F},
                  15,
                  alive ? (nation == world.playerNation ? detail::kAccent : detail::kPositive) : detail::kNegative,
                  FontRole::Mono);
-        rowY += 52.F;
+        rowY += 46.F;
     }
 
     drawText(target,
              "Enter or left click to return to doctrine select.",
-             {panel.position.x + 30.F, panel.position.y + panel.size.y - 44.F},
+             {panel.position.x + 30.F, panel.position.y + panel.size.y - 26.F},
              17,
              detail::kTextMuted,
              FontRole::Body);

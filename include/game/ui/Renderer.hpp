@@ -17,11 +17,11 @@ class Renderer {
     Renderer();
     [[nodiscard]] bool hasFont() const;
 
-    void drawSelectionScreen(sf::RenderWindow& window, NationId highlightedNation) const;
-    void drawMatch(sf::RenderWindow& window,
+    void drawSelectionScreen(sf::RenderTarget& target, NationId highlightedNation) const;
+    void drawMatch(sf::RenderTarget& target,
                    const sim::WorldState& world,
                    const InputController& inputController) const;
-    void drawGameOver(sf::RenderWindow& window, const sim::WorldState& world) const;
+    void drawGameOver(sf::RenderTarget& target, const sim::WorldState& world) const;
 
     [[nodiscard]] std::optional<NationId> selectionFromPixel(sf::Vector2i pixel) const;
     [[nodiscard]] std::optional<sim::TileCoord> tileFromPixel(const sim::WorldState& world, sf::Vector2i pixel) const;

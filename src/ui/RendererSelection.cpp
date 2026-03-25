@@ -9,12 +9,12 @@
 
 namespace game::ui {
 
-void Renderer::drawSelectionScreen(sf::RenderWindow& window, const NationId highlightedNation) const {
-    drawAmbientBackdrop(window, window.getSize());
+void Renderer::drawSelectionScreen(sf::RenderTarget& target, const NationId highlightedNation) const {
+    drawAmbientBackdrop(target, target.getSize());
     const auto layout = selectionLayout();
-    drawSelectionHero(window, layout);
-    drawSelectionNationCards(window, layout, highlightedNation);
-    drawSelectionFooter(window, layout);
+    drawSelectionHero(target, layout);
+    drawSelectionNationCards(target, layout, highlightedNation);
+    drawSelectionFooter(target, layout);
 }
 
 void Renderer::drawSelectionHero(sf::RenderTarget& target, const SelectionLayout& layout) const {
@@ -33,17 +33,17 @@ void Renderer::drawSelectionHero(sf::RenderTarget& target, const SelectionLayout
              false,
              1.18F);
     drawText(target,
-             "Select a war doctrine\nand take the table.",
+             "Choose your doctrine\nand seize the table.",
              {layout.heroRect.position.x + 28.F, layout.heroRect.position.y + 92.F},
-             44,
+             40,
              detail::kTextPrimary,
              FontRole::Display,
              false,
              0.92F);
     drawText(target,
-             "Each nation bends the same battlefield in a different direction: speed, force, attrition, or macro control.",
+             "Each nation bends the same battlefield toward speed, force, attrition, or macro control.",
              {layout.heroRect.position.x + 30.F, layout.heroRect.position.y + 212.F},
-             20,
+             18,
              detail::kTextMuted,
              FontRole::Body,
              false,
@@ -187,7 +187,7 @@ void Renderer::drawSelectionFooter(sf::RenderTarget& target, const SelectionLayo
               detail::withAlpha(detail::kCore, 220),
               detail::withAlpha(detail::kBorder, 110));
     drawText(target,
-             "Preserved controls: left click select / command · right click or Esc to clear · capitals regenerate with territory held.",
+             "Controls: left click select/command | right click or Esc to clear | capitals regenerate with territory held.",
              {layout.footerRect.position.x + 28.F, layout.footerRect.position.y + 20.F},
              15,
              detail::kTextMuted,

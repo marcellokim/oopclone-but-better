@@ -117,13 +117,13 @@ inline std::vector<std::filesystem::path> monoFontCandidates() {
 inline std::string doctrineLine(const NationId nation) {
     switch (nation) {
     case NationId::SwiftLeague:
-        return "Fast border raids and pressure through tempo.";
+        return "Border raids. Tempo first.";
     case NationId::IronLegion:
-        return "Overwhelm weak fronts with brutal concentrated force.";
+        return "Break weak fronts with concentrated force.";
     case NationId::BastionDirectorate:
-        return "Fortify choke points, bleed invaders, counter only on certainty.";
+        return "Fortify chokepoints and bleed invaders.";
     case NationId::CrownConsortium:
-        return "Grow territory, stabilize reserves, then strike with surplus.";
+        return "Grow territory, then strike with reserves.";
     case NationId::Neutral:
         return "Unaligned territory.";
     }
@@ -163,6 +163,13 @@ inline std::string selectedTileSummary(const sim::WorldState& world) {
     return "Selected tile (" + std::to_string(coord.x) + ", " + std::to_string(coord.y) + ") | " +
            std::string(nationName(tile.owner)) + " | troops " + std::to_string(tile.troops) +
            (tile.hasCapital ? " | capital" : "");
+}
+
+inline std::string compactStandingStatus(const bool alive, const bool player) {
+    if (!alive) {
+        return "down";
+    }
+    return player ? "you" : "active";
 }
 
 inline void drawLine(sf::RenderTarget& target,

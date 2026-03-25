@@ -56,6 +56,14 @@ target_include_directories(territory_war PRIVATE include)
 target_compile_definitions(territory_war PRIVATE TERRITORY_WAR_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries(territory_war PRIVATE territory_war_core SFML::Graphics SFML::Window SFML::System)
 
+add_executable(territory_war_preview
+  tools/render_preview.cpp
+  ${RENDERER_SOURCES}
+)
+target_include_directories(territory_war_preview PRIVATE include)
+target_compile_definitions(territory_war_preview PRIVATE TERRITORY_WAR_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries(territory_war_preview PRIVATE territory_war_core SFML::Graphics SFML::Window SFML::System)
+
 add_executable(territory_war_tests
   tests/test_main.cpp
   tests/sim_rules_test.cpp

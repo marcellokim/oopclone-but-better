@@ -189,8 +189,8 @@ Renderer::MatchLayout Renderer::matchLayout(const sim::WorldState& world) const 
     layout.rightRail = detail::makeRect(910.F, 118.F, 336.F, 626.F);
     layout.commanderPanel = detail::makeRect(926.F, 134.F, 304.F, 106.F);
     layout.hoverPanel = detail::makeRect(926.F, 256.F, 304.F, 198.F);
-    layout.frontsPanel = detail::makeRect(926.F, 470.F, 304.F, 176.F);
-    layout.objectivePanel = detail::makeRect(926.F, 662.F, 304.F, 66.F);
+    layout.frontsPanel = detail::makeRect(926.F, 470.F, 304.F, 206.F);
+    layout.objectivePanel = detail::makeRect(926.F, 692.F, 304.F, 44.F);
     layout.bottomChip = detail::makeRect(90.F, 650.F, 492.F, 74.F);
 
     const float availableTileWidth = layout.mapViewport.size.x - 28.F;
