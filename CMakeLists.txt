@@ -35,6 +35,13 @@ set(CORE_SOURCES
   src/ui/HoverPanel.cpp
 )
 
+set(RENDERER_SOURCES
+  src/ui/Renderer.cpp
+  src/ui/RendererSelection.cpp
+  src/ui/RendererMatch.cpp
+  src/ui/RendererGameOver.cpp
+)
+
 add_library(territory_war_core STATIC ${CORE_SOURCES})
 target_include_directories(territory_war_core PUBLIC include)
 target_compile_features(territory_war_core PUBLIC cxx_std_20)
@@ -42,9 +49,10 @@ target_compile_features(territory_war_core PUBLIC cxx_std_20)
 add_executable(territory_war
   src/main.cpp
   src/App.cpp
-  src/ui/Renderer.cpp
+  ${RENDERER_SOURCES}
 )
 target_include_directories(territory_war PRIVATE include)
+target_compile_definitions(territory_war PRIVATE TERRITORY_WAR_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries(territory_war PRIVATE territory_war_core SFML::Graphics SFML::Window SFML::System)
 
 add_executable(territory_war_tests
@@ -53,7 +61,10 @@ add_executable(territory_war_tests
   tests/ai_behavior_test.cpp
   tests/victory_conditions_test.cpp
   tests/input_command_test.cpp
+  tests/renderer_layout_test.cpp
+  ${RENDERER_SOURCES}
 )
 target_include_directories(territory_war_tests PRIVATE include tests)
-target_link_libraries(territory_war_tests PRIVATE territory_war_core)
+target_compile_definitions(territory_war_tests PRIVATE TERRITORY_WAR_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+target_link_libraries(territory_war_tests PRIVATE territory_war_core SFML::Graphics SFML::Window SFML::System)
 add_test(NAME territory_war_tests COMMAND territory_war_tests)

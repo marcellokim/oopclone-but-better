@@ -81,6 +81,31 @@ class Renderer {
                   sf::Color textColor,
                   FontRole role = FontRole::Body) const;
 
+    void drawSelectionHero(sf::RenderTarget& target, const SelectionLayout& layout) const;
+    void drawSelectionNationCards(sf::RenderTarget& target,
+                                  const SelectionLayout& layout,
+                                  NationId highlightedNation) const;
+    void drawSelectionFooter(sf::RenderTarget& target, const SelectionLayout& layout) const;
+
+    void drawMatchTopStrip(sf::RenderTarget& target,
+                           const MatchLayout& layout,
+                           const sim::WorldState& world,
+                           const InputController& inputController) const;
+    void drawMatchMap(sf::RenderTarget& target, const MatchLayout& layout, const sim::WorldState& world) const;
+    void drawActiveTransits(sf::RenderTarget& target,
+                            const MatchLayout& layout,
+                            const sim::WorldState& world) const;
+    void drawCommanderPanel(sf::RenderTarget& target,
+                            const MatchLayout& layout,
+                            const sim::WorldState& world,
+                            const InputController& inputController) const;
+    void drawHoverPanel(sf::RenderTarget& target, const MatchLayout& layout, const sim::WorldState& world) const;
+    void drawFrontsPanel(sf::RenderTarget& target, const MatchLayout& layout, const sim::WorldState& world) const;
+    void drawObjectivePanel(sf::RenderTarget& target, const MatchLayout& layout) const;
+    void drawCommandPreview(sf::RenderTarget& target, const MatchLayout& layout, const sim::WorldState& world) const;
+
+    void drawGameOverPanel(sf::RenderTarget& target, const sim::WorldState& world) const;
+
     sf::Font m_displayFont{};
     sf::Font m_bodyFont{};
     sf::Font m_monoFont{};
