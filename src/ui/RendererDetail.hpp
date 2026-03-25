@@ -117,13 +117,13 @@ inline std::vector<std::filesystem::path> monoFontCandidates() {
 inline std::string doctrineLine(const NationId nation) {
     switch (nation) {
     case NationId::SwiftLeague:
-        return "Border raids. Tempo first.";
+        return "Precision tempo through contestable lanes.";
     case NationId::IronLegion:
-        return "Break weak fronts with concentrated force.";
+        return "Disciplined stability with balanced fronts.";
     case NationId::BastionDirectorate:
-        return "Fortify chokepoints and bleed invaders.";
+        return "Infrastructure pressure through road control.";
     case NationId::CrownConsortium:
-        return "Grow territory, then strike with reserves.";
+        return "Adaptive central command with flexible reserves.";
     case NationId::Neutral:
         return "Unaligned territory.";
     }
@@ -133,13 +133,13 @@ inline std::string doctrineLine(const NationId nation) {
 inline std::string compactNationName(const NationId nation) {
     switch (nation) {
     case NationId::SwiftLeague:
-        return "Swift";
+        return "서강";
     case NationId::IronLegion:
-        return "Iron";
+        return "성균관";
     case NationId::BastionDirectorate:
-        return "Bastion";
+        return "한양";
     case NationId::CrownConsortium:
-        return "Crown";
+        return "중앙";
     case NationId::Neutral:
         return "Neutral";
     }
@@ -149,13 +149,13 @@ inline std::string compactNationName(const NationId nation) {
 inline std::string doctrineTag(const NationId nation) {
     switch (nation) {
     case NationId::SwiftLeague:
-        return "flanking doctrine";
+        return "precision lanes";
     case NationId::IronLegion:
-        return "shock doctrine";
+        return "balanced basin";
     case NationId::BastionDirectorate:
-        return "attrition doctrine";
+        return "infrastructure push";
     case NationId::CrownConsortium:
-        return "macro doctrine";
+        return "adaptive center";
     case NationId::Neutral:
         return "neutral";
     }
@@ -171,13 +171,14 @@ inline std::string standingStatus(const bool alive, const bool player) {
 
 inline std::string selectedTileSummary(const sim::WorldState& world) {
     if (!world.selectedTile.has_value()) {
-        return "Select an owned tile, then click a friendly or enemy destination to move or attack.";
+        return "Select an owned tile, then hover or click a destination to preview route speed and launch caps.";
     }
 
     const auto coord = *world.selectedTile;
     const auto& tile = sim::tileAt(world, coord);
     return "Selected tile (" + std::to_string(coord.x) + ", " + std::to_string(coord.y) + ") | " +
-           std::string(nationName(tile.owner)) + " | troops " + std::to_string(tile.troops) +
+           std::string(nationName(tile.owner)) + " | " + std::string(terrainName(tile.terrain)) + " | troops " +
+           std::to_string(tile.troops) +
            (tile.hasCapital ? " | capital" : "");
 }
 

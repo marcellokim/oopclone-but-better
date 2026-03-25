@@ -5,6 +5,29 @@
 
 namespace game::ui {
 
+namespace {
+
+bool terrainMatches(const TerrainType terrain, const std::string_view label) {
+    return terrainName(terrain) == label;
+}
+
+std::string movementLine(const TerrainType terrain) {
+    if (terrainMatches(terrain, "Sea")) {
+        return "Move: blocked for land orders";
+    }
+
+    std::ostringstream moveStream;
+    moveStream << std::fixed << std::setprecision(2) << terrainMovementMultiplier(terrain);
+    return "Move: " + moveStream.str() + "x speed";
+}
+
+std::string throughputLine(const TerrainType terrain) {
+    const int cap = game::terrainThroughputCap(terrain);
+    return cap > 0 ? "Launch cap: " + std::to_string(cap) + " troops" : "Launch cap: blocked";
+}
+
+} // namespace
+
 std::vector<std::string> buildHoverLines(const sim::WorldState& world,
                                          const sim::TileCoord coord,
                                          const MatchConfig& config) {
@@ -14,10 +37,9 @@ std::vector<std::string> buildHoverLines(const sim::WorldState& world,
 
     const auto& tile = sim::tileAt(world, coord);
     std::vector<std::string> lines;
-    lines.push_back("Tile (" + std::to_string(coord.x) + ", " + std::to_string(coord.y) + ")");
-    lines.push_back(std::string("Owner: ") + std::string(nationName(tile.owner)));
-    lines.push_back("Troops: " + std::to_string(tile.troops));
-    lines.push_back(std::string("Terrain: ") + std::string(terrainName(tile.terrain)));
+    lines.push_back("Tile (" + std::to_string(coord.x) + ", " + std::to_string(coord.y) + ") | " +
+                    std::string(terrainName(tile.terrain)));
+    lines.push_back(std::string("Owner: ") + std::string(nationName(tile.owner)) + " | troops " + std::to_string(tile.troops));
 
     if (tile.hasCapital) {
         const float regenRate = config.baseRegenPerSecond +
@@ -25,11 +47,13 @@ std::vector<std::string> buildHoverLines(const sim::WorldState& world,
                                     nationDefinition(tile.owner).regen;
         std::ostringstream regenStream;
         regenStream << std::fixed << std::setprecision(2) << regenRate;
-        lines.push_back("Capital: yes");
-        lines.push_back("Regen/s: " + regenStream.str());
+        lines.push_back("Capital: yes | regen/s " + regenStream.str());
     } else {
         lines.push_back("Capital: no");
     }
+
+    lines.push_back(movementLine(tile.terrain));
+    lines.push_back(throughputLine(tile.terrain));
 
     return lines;
 }

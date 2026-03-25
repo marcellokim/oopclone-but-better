@@ -6,8 +6,19 @@
 
 namespace game::sim::Pathfinder {
 
+namespace {
+
+bool isSeaTile(const WorldState& world, const TileCoord coord) {
+    return terrainName(tileAt(world, coord).terrain) == "Sea";
+}
+
+} // namespace
+
 std::vector<TileCoord> findPath(const WorldState& world, const TileCoord start, const TileCoord goal) {
     if (!inBounds(world, start) || !inBounds(world, goal)) {
+        return {};
+    }
+    if (isSeaTile(world, start) || isSeaTile(world, goal)) {
         return {};
     }
     if (start == goal) {
@@ -29,7 +40,7 @@ std::vector<TileCoord> findPath(const WorldState& world, const TileCoord start, 
 
         for (const auto& direction : kCardinalDirections) {
             const TileCoord next{current.x + direction.x, current.y + direction.y};
-            if (!inBounds(world, next) || cameFrom.contains(next)) {
+            if (!inBounds(world, next) || cameFrom.contains(next) || isSeaTile(world, next)) {
                 continue;
             }
             cameFrom.emplace(next, current);

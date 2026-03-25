@@ -32,6 +32,7 @@ Capture the automated and smoke checks that justify running the playtest on this
 - `ctest --test-dir build --output-on-failure`:
 - Runtime smoke (`./build/territory_war` or equivalent bounded launch):
 - Geometry / hit-testing spot check completed:
+- Terrain update smoke (sea / mountain / bottleneck) completed:
 - Bundled-font path verified:
 - Fallback-font path verified:
 
@@ -45,6 +46,7 @@ Capture the automated and smoke checks that justify running the playtest on this
 - Can I instantly identify **my capital**?
 - Can I instantly find the **command rail / operational HUD**?
 - Can I tell what the current **send ratio** is without searching?
+- If the terrain update is present, can I quickly read coasts, mountain belts, and the main outward lanes?
 - Does the map still feel like the primary object on screen?
 
 ### Score
@@ -91,7 +93,8 @@ Capture the automated and smoke checks that justify running the playtest on this
 ### Check
 - Can I still read **troop counts** at a glance?
 - Are **moving transits** readable without cluttering the battlefield?
-- Can I distinguish **owned / enemy / neutral / capital** quickly?
+- Can I distinguish **owned / enemy / neutral / capital / special terrain** quickly?
+- If sea or mountain tiles are present, do they read as tactical constraints instead of decoration?
 - Do transit lines or glow effects ever hide troop capsules or tile ownership?
 
 ### Score
@@ -161,6 +164,7 @@ Capture the automated and smoke checks that justify running the playtest on this
 
 ### Check
 - Does each doctrine card feel distinct in identity, not just color?
+- Are the university-themed names and doctrine lines respectful, playful, and strategy-focused?
 - Are stats readable without visual overload?
 - Is the currently hovered/selected doctrine clearly emphasized?
 - Does the screen feel premium rather than like a simple launcher menu?
@@ -231,4 +235,6 @@ Capture the automated and smoke checks that justify running the playtest on this
 - Draw geometry and hit-testing still aligned:
 - Preferred bundled fonts render correctly:
 - Graceful fallback path still renders correctly:
+- Terrain semantics stay readable under live-match pressure:
+- University retheme remains respectful in all player-facing copy:
 - Remaining concerns / follow-up verification:

@@ -210,15 +210,26 @@ sf::Color Renderer::nationColor(const NationId nation) const {
 }
 
 sf::Color Renderer::tileColor(const sim::TileState& tile) const {
+    const auto terrain = terrainName(tile.terrain);
     if (tile.owner == NationId::Neutral) {
+        if (terrain == "Sea") {
+            return sf::Color(42, 74, 108);
+        }
+        if (terrain == "Mountain") {
+            return sf::Color(88, 84, 80);
+        }
         return tile.terrain == TerrainType::Road ? sf::Color(76, 86, 98) : sf::Color(56, 64, 76);
     }
 
     auto base = detail::mix(nationColor(tile.owner), sf::Color(18, 22, 29), 0.48F);
-    if (tile.terrain == TerrainType::Road) {
+    if (terrain == "Sea") {
+        base = detail::mix(base, sf::Color(36, 92, 138), 0.60F);
+    } else if (tile.terrain == TerrainType::Road) {
         base = detail::brighten(base, 1.18F);
     } else if (tile.terrain == TerrainType::Highland) {
         base = detail::mix(base, sf::Color(38, 44, 58), 0.28F);
+    } else if (terrain == "Mountain") {
+        base = detail::mix(base, sf::Color(100, 92, 84), 0.45F);
     } else if (tile.terrain == TerrainType::Capital) {
         base = detail::brighten(base, 1.10F);
     }
