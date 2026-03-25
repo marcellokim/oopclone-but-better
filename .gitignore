@@ -1,0 +1,9 @@
+build/
+cmake-build-*/
+.DS_Store
+.omx/logs/
+.omx/state/
+.omx/metrics.json
+.omx/hud-config.json
+.omx/setup-scope.json
+.omx/tmux-hook.json

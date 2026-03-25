@@ -1,0 +1,27 @@
+# Context Snapshot — realtime-4nation-territory-war
+
+- **Timestamp (UTC):** 2026-03-25T05:05:15Z
+- **Task statement:** Plan a war-simulation-flavored territory-expansion game in C++ with 2D presentation, 4 asymmetric nations, real-time troop control on tiles, AI opponents, capital capture / total army-loss victory, and territory-scaled troop regeneration from capitals.
+- **Desired outcome:** Execution-ready planning artifacts for a first playable version that can be implemented in a greenfield repository.
+- **Known facts / evidence:**
+  - Repository is currently greenfield and contains only `.omx/` operational scaffolding; no source code, assets, or build files exist yet.
+  - User explicitly wants: C++-based, 2D, real-time (not turn-based), click-to-move tile control, hover troop info, 4 countries with different mobility/attack/defense identities, one human player + 3 AI, AI adapts strategy in real time, capital capture or total military loss as win condition, troop regeneration from capital scaling with territory held.
+  - User allows unspecified gameplay elements to be filled in appropriately.
+- **Constraints:**
+  - Planning only for this turn (`$ralplan`); do not implement gameplay code yet.
+  - Keep plan suitable for small-to-medium solo implementation scope.
+  - Prefer explicit, testable acceptance criteria and a clear MVP slice.
+- **Unknowns / open questions:**
+  - Preferred rendering/game framework (SFML, raylib, SDL3, custom stack).
+  - Target platform(s), resolution targets, and art/audio style.
+  - Single-map vs multiple maps at first release.
+  - Expected match duration and desired troop-count scale.
+- **Likely codebase touchpoints:**
+  - `CMakeLists.txt`
+  - `src/`, `include/`
+  - `assets/`
+  - `tests/`
+  - `docs/` or `.omx/plans/` for design references
+- **Planning stance:**
+  - Treat this as greenfield scope definition for a vertical-slice RTS-lite / territory-control game.
+  - Default to autonomous assumptions where user intent is clear and risk is low.
