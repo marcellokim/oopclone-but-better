@@ -11,22 +11,6 @@ bool terrainMatches(const TerrainType terrain, const std::string_view label) {
     return terrainName(terrain) == label;
 }
 
-int terrainThroughputCap(const TerrainType terrain) {
-    if (terrainMatches(terrain, "Sea")) {
-        return 0;
-    }
-    if (terrainMatches(terrain, "Road")) {
-        return 72;
-    }
-    if (terrainMatches(terrain, "Highland")) {
-        return 32;
-    }
-    if (terrainMatches(terrain, "Mountain")) {
-        return 18;
-    }
-    return 48;
-}
-
 std::string movementLine(const TerrainType terrain) {
     if (terrainMatches(terrain, "Sea")) {
         return "Move: blocked for land orders";
@@ -38,7 +22,7 @@ std::string movementLine(const TerrainType terrain) {
 }
 
 std::string throughputLine(const TerrainType terrain) {
-    const int cap = terrainThroughputCap(terrain);
+    const int cap = game::terrainThroughputCap(terrain);
     return cap > 0 ? "Launch cap: " + std::to_string(cap) + " troops" : "Launch cap: blocked";
 }
 

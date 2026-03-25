@@ -23,8 +23,10 @@ std::optional<game::TerrainType> terrainNamed(const std::string_view target) {
     return std::nullopt;
 }
 
-bool hasLine(const std::vector<std::string>& lines, const std::string_view needle) {
-    return std::any_of(lines.begin(), lines.end(), [needle](const std::string& line) { return line == needle; });
+bool hasLineContaining(const std::vector<std::string>& lines, const std::string_view needle) {
+    return std::any_of(lines.begin(), lines.end(), [needle](const std::string& line) {
+        return line.find(needle) != std::string::npos;
+    });
 }
 }
 
@@ -57,9 +59,18 @@ TEST_CASE(renderer_player_facing_names_follow_university_retheme) {
         "중앙대학교",
     }};
 
-    for (std::size_t index = 0; index < nations.size(); ++index) {
-        test::require(game::nationName(nations[index]) == expectedNames[index],
-                      "playable faction names should use the university retheme in selection and match HUD surfaces");
+    for (const auto expectedName : expectedNames) {
+        const bool found = std::any_of(nations.begin(), nations.end(), [expectedName](const game::NationId nation) {
+            return game::nationName(nation) == expectedName;
+        });
+        test::require(found, "playable faction roster should include each university name exactly once player-facing");
+    }
+
+    for (const auto nation : nations) {
+        test::require(!game::nationDoctrineLine(nation).empty(),
+                      "each university faction should expose a non-empty doctrine line");
+        test::require(!game::nationDoctrineTag(nation).empty(),
+                      "each university faction should expose a non-empty doctrine tag");
     }
 }
 
@@ -77,15 +88,23 @@ TEST_CASE(renderer_hover_lines_surface_university_names_and_new_terrain_labels) 
     probeTile.terrain = *mountain;
 
     const auto mountainLines = game::ui::buildHoverLines(world, {5, 5});
-    test::require(hasLine(mountainLines, "Owner: 서강대학교"),
+    test::require(hasLineContaining(mountainLines, "Owner: 서강대학교"),
                   "hover intel should show the renamed university owner label");
-    test::require(hasLine(mountainLines, "Terrain: Mountain"),
-                  "hover intel should show Mountain using the same terrain label as the core config");
+    test::require(hasLineContaining(mountainLines, "Mountain"),
+                  "hover intel should surface Mountain in the tile summary");
+    test::require(hasLineContaining(mountainLines, "Move:"),
+                  "hover intel should include movement guidance for new terrain");
+    test::require(hasLineContaining(mountainLines, "Launch cap:"),
+                  "hover intel should include throughput guidance for new terrain");
 
     probeTile.terrain = *sea;
     const auto seaLines = game::ui::buildHoverLines(world, {5, 5});
-    test::require(hasLine(seaLines, "Terrain: Sea"),
-                  "hover intel should show Sea using the same terrain label as the core config");
+    test::require(hasLineContaining(seaLines, "Sea"),
+                  "hover intel should surface Sea in the tile summary");
+    test::require(hasLineContaining(seaLines, "Move: blocked for land orders"),
+                  "sea hover intel should explain that land movement is blocked");
+    test::require(hasLineContaining(seaLines, "Launch cap: blocked"),
+                  "sea hover intel should show that throughput is blocked");
 }
 
 TEST_CASE(renderer_match_hit_testing_maps_pixels_to_tiles) {

@@ -5,6 +5,7 @@
 #include "game/sim/WorldState.hpp"
 #include "test_harness.hpp"
 
+#include <algorithm>
 #include <array>
 #include <optional>
 #include <string_view>
@@ -57,7 +58,8 @@ int ownedBoundingBoxArea(const game::sim::WorldState& world, const game::NationI
 }
 
 void prepareRouteComparisonWorld(game::sim::WorldState& world) {
-    for (const auto coord : std::array<game::sim::TileCoord, 4>{{{{2, 1}, {3, 1}, {4, 1}, {5, 1}}}}) {
+    constexpr std::array<game::sim::TileCoord, 4> kRouteTiles{{{2, 1}, {3, 1}, {4, 1}, {5, 1}}};
+    for (const auto coord : kRouteTiles) {
         auto& tile = game::sim::tileAt(world, coord);
         tile.owner = coord.x == 2 ? game::NationId::SwiftLeague : game::NationId::Neutral;
         tile.troops = coord.x == 2 ? 120 : 0;

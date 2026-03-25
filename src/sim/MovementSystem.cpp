@@ -10,30 +10,10 @@ namespace game::sim::MovementSystem {
 
 namespace {
 
-bool terrainMatches(const TerrainType terrain, const std::string_view label) {
-    return terrainName(terrain) == label;
-}
-
-int terrainThroughputCap(const TerrainType terrain) {
-    if (terrainMatches(terrain, "Sea")) {
-        return 0;
-    }
-    if (terrainMatches(terrain, "Road")) {
-        return 72;
-    }
-    if (terrainMatches(terrain, "Highland")) {
-        return 32;
-    }
-    if (terrainMatches(terrain, "Mountain")) {
-        return 18;
-    }
-    return 48;
-}
-
 int pathThroughputCap(const WorldState& world, const std::vector<TileCoord>& path) {
     int bottleneck = std::numeric_limits<int>::max();
     for (const auto& coord : path) {
-        bottleneck = std::min(bottleneck, terrainThroughputCap(tileAt(world, coord).terrain));
+        bottleneck = std::min(bottleneck, game::terrainThroughputCap(tileAt(world, coord).terrain));
     }
     return bottleneck == std::numeric_limits<int>::max() ? 0 : bottleneck;
 }

@@ -72,3 +72,4 @@ Verification:
 
 ## Integration Note
 This guide is intentionally stricter than the legacy smoke list: do not sign off on the terrain update until both the automated gates and the manual terrain/faction checks are captured together.
+Keep throughput-cap copy aligned with the shared `game::terrainThroughputCap(...)` rules so hover intel, route previews, and sim assertions all describe the same bottleneck numbers.
