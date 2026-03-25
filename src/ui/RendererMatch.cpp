@@ -1,13 +1,85 @@
 #include "game/ui/Renderer.hpp"
 
 #include "RendererDetail.hpp"
+#include "game/sim/Pathfinder.hpp"
 #include "game/ui/VisualTuning.hpp"
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/Clock.hpp>
 
+#include <iomanip>
+#include <limits>
+#include <sstream>
+
 namespace game::ui {
+
+namespace {
+
+bool terrainMatches(const TerrainType terrain, const std::string_view label) {
+    return terrainName(terrain) == label;
+}
+
+int terrainThroughputCap(const TerrainType terrain) {
+    if (terrainMatches(terrain, "Sea")) {
+        return 0;
+    }
+    if (terrainMatches(terrain, "Road")) {
+        return 72;
+    }
+    if (terrainMatches(terrain, "Highland")) {
+        return 32;
+    }
+    if (terrainMatches(terrain, "Mountain")) {
+        return 18;
+    }
+    return 48;
+}
+
+int pathThroughputCap(const sim::WorldState& world, const std::vector<sim::TileCoord>& path) {
+    int bottleneck = std::numeric_limits<int>::max();
+    for (const auto& coord : path) {
+        bottleneck = std::min(bottleneck, terrainThroughputCap(sim::tileAt(world, coord).terrain));
+    }
+    return bottleneck == std::numeric_limits<int>::max() ? 0 : bottleneck;
+}
+
+float pathSpeedMultiplier(const sim::WorldState& world, const std::vector<sim::TileCoord>& path) {
+    if (path.empty()) {
+        return 0.F;
+    }
+
+    float totalMultiplier = 0.F;
+    for (const auto& coord : path) {
+        totalMultiplier += terrainMovementMultiplier(sim::tileAt(world, coord).terrain);
+    }
+    return totalMultiplier / static_cast<float>(path.size());
+}
+
+std::string formatMultiplier(const float value) {
+    std::ostringstream stream;
+    stream << std::fixed << std::setprecision(2) << value;
+    return stream.str();
+}
+
+std::string routePreviewSummary(const sim::WorldState& world) {
+    if (!world.selectedTile.has_value()) {
+        return "Sea blocks land routes. Mountains slow columns and cap launches.";
+    }
+    if (!world.hoveredTile.has_value() || *world.hoveredTile == *world.selectedTile) {
+        return "Hover a destination for hops, speed, and launch cap.";
+    }
+
+    const auto path = sim::Pathfinder::findPath(world, *world.selectedTile, *world.hoveredTile);
+    if (path.size() < 2) {
+        return "No land route available. Sea tiles block this corridor.";
+    }
+
+    return std::to_string(path.size() - 1) + " hops | " + formatMultiplier(pathSpeedMultiplier(world, path)) +
+           "x speed | cap " + std::to_string(pathThroughputCap(world, path));
+}
+
+} // namespace
 
 void Renderer::drawMatch(sf::RenderTarget& target,
                          const sim::WorldState& world,
@@ -64,7 +136,7 @@ void Renderer::drawMatchTopStrip(sf::RenderTarget& target,
              FontRole::Mono);
     drawChip(target,
              detail::makeRect(layout.topStrip.position.x + 878.F, layout.topStrip.position.y + 20.F, 338.F, 34.F),
-             "objective: defend your capital / erase every rival",
+             "terrain: sea blocks land routes / mountains slow + bottleneck",
              detail::withAlpha(sf::Color(79, 100, 128), 42),
              detail::kTextPrimary,
              FontRole::Body);
@@ -134,6 +206,27 @@ void Renderer::drawMatchMap(sf::RenderTarget& target, const MatchLayout& layout,
                 ridge.setPosition({tilePos.x + 7.F, tilePos.y + 10.F});
                 ridge.setFillColor(detail::withAlpha(sf::Color(236, 211, 150), 110));
                 target.draw(ridge);
+            }
+            if (terrainMatches(tile.terrain, "Mountain")) {
+                sf::RectangleShape ridgeLeft({tileSize.x - 16.F, 3.F});
+                ridgeLeft.setPosition({tilePos.x + 8.F, tilePos.y + 12.F});
+                ridgeLeft.setRotation(sf::degrees(24.F));
+                ridgeLeft.setFillColor(detail::withAlpha(sf::Color(226, 211, 182), 112));
+                target.draw(ridgeLeft);
+
+                sf::RectangleShape ridgeRight({tileSize.x - 16.F, 3.F});
+                ridgeRight.setPosition({tilePos.x + 13.F, tilePos.y + tileSize.y - 8.F});
+                ridgeRight.setRotation(sf::degrees(-24.F));
+                ridgeRight.setFillColor(detail::withAlpha(sf::Color(161, 148, 131), 128));
+                target.draw(ridgeRight);
+            }
+            if (terrainMatches(tile.terrain, "Sea")) {
+                for (int wave = 0; wave < 2; ++wave) {
+                    sf::RectangleShape swell({tileSize.x - 14.F, 3.F});
+                    swell.setPosition({tilePos.x + 7.F, tilePos.y + 12.F + static_cast<float>(wave) * 10.F});
+                    swell.setFillColor(detail::withAlpha(sf::Color(194, 226, 255), static_cast<std::uint8_t>(80 - wave * 18)));
+                    target.draw(swell);
+                }
             }
             if (tile.hasCapital) {
                 sf::CircleShape halo(layout.tileSize * tuning.capitalHaloScale);
@@ -274,7 +367,7 @@ void Renderer::drawHoverPanel(sf::RenderTarget& target, const MatchLayout& layou
 
     const auto hoverLines = world.hoveredTile
                                 ? buildHoverLines(world, *world.hoveredTile)
-                                : std::vector<std::string>{"Hover a tile to inspect owner, troops, terrain, and capital regen."};
+                                : std::vector<std::string>{"Hover a tile to inspect owner, troops, terrain, move speed, and launch caps."};
     float hoverY = layout.hoverPanel.position.y + 54.F;
     for (const auto& line : hoverLines) {
         drawText(target,
@@ -379,9 +472,15 @@ void Renderer::drawCommandPreview(sf::RenderTarget& target,
              1.16F);
     drawText(target,
              detail::selectedTileSummary(world),
-             {layout.bottomChip.position.x + 18.F, layout.bottomChip.position.y + 42.F},
-             15,
+             {layout.bottomChip.position.x + 18.F, layout.bottomChip.position.y + 38.F},
+             14,
              detail::kTextPrimary,
+             FontRole::Body);
+    drawText(target,
+             routePreviewSummary(world),
+             {layout.bottomChip.position.x + 18.F, layout.bottomChip.position.y + 58.F},
+             12,
+             detail::kTextMuted,
              FontRole::Body);
 }
 

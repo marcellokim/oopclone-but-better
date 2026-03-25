@@ -1,10 +1,31 @@
+#include "game/ui/HoverPanel.hpp"
 #include "game/ui/Renderer.hpp"
 #include "test_harness.hpp"
+
+#include <algorithm>
+#include <array>
+#include <optional>
+#include <string>
+#include <string_view>
 
 namespace {
 constexpr int kMapOriginX = 75;
 constexpr int kMapOriginY = 158;
 constexpr int kTileSize = 43;
+
+std::optional<game::TerrainType> terrainNamed(const std::string_view target) {
+    for (int rawValue = 0; rawValue < 8; ++rawValue) {
+        const auto terrain = static_cast<game::TerrainType>(rawValue);
+        if (game::terrainName(terrain) == target) {
+            return terrain;
+        }
+    }
+    return std::nullopt;
+}
+
+bool hasLine(const std::vector<std::string>& lines, const std::string_view needle) {
+    return std::any_of(lines.begin(), lines.end(), [needle](const std::string& line) { return line == needle; });
+}
 }
 
 TEST_CASE(renderer_loads_bundled_redistributable_fonts) {
@@ -16,11 +37,55 @@ TEST_CASE(renderer_selection_hit_testing_matches_doctrine_cards) {
     game::ui::Renderer renderer;
     const auto nations = game::playableNations();
 
-    test::require(renderer.selectionFromPixel({520, 180}) == nations[0], "first doctrine card should map to Swift League");
-    test::require(renderer.selectionFromPixel({980, 180}) == nations[1], "second doctrine card should map to Iron Legion");
-    test::require(renderer.selectionFromPixel({520, 470}) == nations[2], "third doctrine card should map to Bastion Directorate");
-    test::require(renderer.selectionFromPixel({980, 470}) == nations[3], "fourth doctrine card should map to Crown Consortium");
+    test::require(renderer.selectionFromPixel({520, 180}) == nations[0],
+                  "first doctrine card should map to the first playable faction");
+    test::require(renderer.selectionFromPixel({980, 180}) == nations[1],
+                  "second doctrine card should map to the second playable faction");
+    test::require(renderer.selectionFromPixel({520, 470}) == nations[2],
+                  "third doctrine card should map to the third playable faction");
+    test::require(renderer.selectionFromPixel({980, 470}) == nations[3],
+                  "fourth doctrine card should map to the fourth playable faction");
     test::require(!renderer.selectionFromPixel({32, 32}).has_value(), "pixels outside cards should not select a nation");
+}
+
+TEST_CASE(renderer_player_facing_names_follow_university_retheme) {
+    const auto nations = game::playableNations();
+    const std::array<std::string_view, 4> expectedNames{{
+        "서강대학교",
+        "성균관대학교",
+        "한양대학교",
+        "중앙대학교",
+    }};
+
+    for (std::size_t index = 0; index < nations.size(); ++index) {
+        test::require(game::nationName(nations[index]) == expectedNames[index],
+                      "playable faction names should use the university retheme in selection and match HUD surfaces");
+    }
+}
+
+TEST_CASE(renderer_hover_lines_surface_university_names_and_new_terrain_labels) {
+    const auto mountain = terrainNamed("Mountain");
+    const auto sea = terrainNamed("Sea");
+    test::require(mountain.has_value(), "terrain update should expose a Mountain terrain label");
+    test::require(sea.has_value(), "terrain update should expose a Sea terrain label");
+
+    auto world = game::sim::createInitialWorld(game::NationId::SwiftLeague);
+    auto& probeTile = game::sim::tileAt(world, {5, 5});
+    probeTile.owner = game::playableNations()[0];
+    probeTile.troops = 37;
+    probeTile.hasCapital = false;
+    probeTile.terrain = *mountain;
+
+    const auto mountainLines = game::ui::buildHoverLines(world, {5, 5});
+    test::require(hasLine(mountainLines, "Owner: 서강대학교"),
+                  "hover intel should show the renamed university owner label");
+    test::require(hasLine(mountainLines, "Terrain: Mountain"),
+                  "hover intel should show Mountain using the same terrain label as the core config");
+
+    probeTile.terrain = *sea;
+    const auto seaLines = game::ui::buildHoverLines(world, {5, 5});
+    test::require(hasLine(seaLines, "Terrain: Sea"),
+                  "hover intel should show Sea using the same terrain label as the core config");
 }
 
 TEST_CASE(renderer_match_hit_testing_maps_pixels_to_tiles) {

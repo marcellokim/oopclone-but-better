@@ -5,12 +5,150 @@
 #include "game/sim/WorldState.hpp"
 #include "test_harness.hpp"
 
+#include <array>
+#include <optional>
+#include <string_view>
+
+namespace {
+
+std::optional<game::TerrainType> terrainNamed(const std::string_view target) {
+    for (int rawValue = 0; rawValue < 8; ++rawValue) {
+        const auto terrain = static_cast<game::TerrainType>(rawValue);
+        if (game::terrainName(terrain) == target) {
+            return terrain;
+        }
+    }
+    return std::nullopt;
+}
+
+bool worldContainsTerrain(const game::sim::WorldState& world, const game::TerrainType terrain) {
+    for (const auto& tile : world.tiles) {
+        if (tile.terrain == terrain) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int ownedBoundingBoxArea(const game::sim::WorldState& world, const game::NationId nation) {
+    int minX = world.width;
+    int minY = world.height;
+    int maxX = -1;
+    int maxY = -1;
+
+    for (int y = 0; y < world.height; ++y) {
+        for (int x = 0; x < world.width; ++x) {
+            const auto& tile = game::sim::tileAt(world, {x, y});
+            if (tile.owner != nation) {
+                continue;
+            }
+            minX = std::min(minX, x);
+            minY = std::min(minY, y);
+            maxX = std::max(maxX, x);
+            maxY = std::max(maxY, y);
+        }
+    }
+
+    if (maxX < minX || maxY < minY) {
+        return 0;
+    }
+
+    return (maxX - minX + 1) * (maxY - minY + 1);
+}
+
+void prepareRouteComparisonWorld(game::sim::WorldState& world) {
+    for (const auto coord : std::array<game::sim::TileCoord, 4>{{{{2, 1}, {3, 1}, {4, 1}, {5, 1}}}}) {
+        auto& tile = game::sim::tileAt(world, coord);
+        tile.owner = coord.x == 2 ? game::NationId::SwiftLeague : game::NationId::Neutral;
+        tile.troops = coord.x == 2 ? 120 : 0;
+        tile.hasCapital = false;
+        tile.terrain = game::TerrainType::Plains;
+    }
+}
+
+} // namespace
+
 TEST_CASE(sim_pathfinder_uses_orthogonal_deterministic_routes) {
     auto world = game::sim::createInitialWorld(game::NationId::SwiftLeague);
     const auto path = game::sim::Pathfinder::findPath(world, {1, 1}, {3, 3});
     test::require(path.size() == 5, "path should contain 5 points from (1,1) to (3,3)");
     test::require(path[1] == game::sim::TileCoord{2, 1},
                   "path should begin with the deterministic east-first shortest route");
+}
+
+TEST_CASE(sim_world_layout_adds_sea_mountain_and_irregular_opening_territories) {
+    const auto mountain = terrainNamed("Mountain");
+    const auto sea = terrainNamed("Sea");
+    test::require(mountain.has_value(), "terrain update should expose a Mountain terrain label");
+    test::require(sea.has_value(), "terrain update should expose a Sea terrain label");
+
+    const auto world = game::sim::createInitialWorld(game::NationId::SwiftLeague);
+    test::require(worldContainsTerrain(world, *mountain), "opening map should contain at least one mountain tile");
+    test::require(worldContainsTerrain(world, *sea), "opening map should contain at least one sea tile");
+
+    for (const auto nation : game::playableNations()) {
+        const int ownedTiles = game::sim::ownedTileCount(world, nation);
+        const int boundingArea = ownedBoundingBoxArea(world, nation);
+        test::require(ownedTiles > 0, "each playable nation should still own starting territory");
+        test::require(boundingArea > ownedTiles,
+                      "opening territories should no longer be perfect rectangles around each capital");
+    }
+}
+
+TEST_CASE(sim_pathfinder_rejects_sea_barriers_and_order_state_remains_stable) {
+    const auto sea = terrainNamed("Sea");
+    test::require(sea.has_value(), "terrain update should expose a Sea terrain label");
+
+    auto world = game::sim::createInitialWorld(game::NationId::SwiftLeague);
+    for (int y = 0; y < world.height; ++y) {
+        auto& barrierTile = game::sim::tileAt(world, {2, y});
+        barrierTile.terrain = *sea;
+        barrierTile.owner = game::NationId::Neutral;
+        barrierTile.troops = 0;
+        barrierTile.hasCapital = false;
+    }
+
+    const int originTroops = game::sim::tileAt(world, {1, 1}).troops;
+    const auto path = game::sim::Pathfinder::findPath(world, {1, 1}, {3, 1});
+    test::require(path.empty(), "pathfinder should not route a normal land path across a sea barrier");
+    test::require(
+        !game::sim::MovementSystem::applyOrder(
+            world,
+            {game::NationId::SwiftLeague, {1, 1}, {3, 1}, game::sim::SendRatio::Quarter, false}),
+        "movement orders across an all-sea barrier should fail safely");
+    test::require(game::sim::tileAt(world, {1, 1}).troops == originTroops,
+                  "failing sea-crossing orders should not consume origin troops");
+    test::require(world.activeTransits.empty(), "failing sea-crossing orders should not create transits");
+}
+
+TEST_CASE(sim_mountain_paths_reduce_speed_and_throughput_relative_to_open_routes) {
+    const auto mountain = terrainNamed("Mountain");
+    test::require(mountain.has_value(), "terrain update should expose a Mountain terrain label");
+
+    auto fastWorld = game::sim::createInitialWorld(game::NationId::SwiftLeague);
+    auto slowWorld = fastWorld;
+    prepareRouteComparisonWorld(fastWorld);
+    prepareRouteComparisonWorld(slowWorld);
+
+    game::sim::tileAt(fastWorld, {3, 1}).terrain = game::TerrainType::Road;
+    game::sim::tileAt(fastWorld, {4, 1}).terrain = game::TerrainType::Road;
+    game::sim::tileAt(slowWorld, {3, 1}).terrain = *mountain;
+    game::sim::tileAt(slowWorld, {4, 1}).terrain = *mountain;
+
+    const game::sim::OrderIntent order{game::NationId::SwiftLeague, {2, 1}, {5, 1}, game::sim::SendRatio::Full, false};
+    test::require(game::sim::MovementSystem::applyOrder(fastWorld, order),
+                  "open-lane control route should create a transit");
+    test::require(game::sim::MovementSystem::applyOrder(slowWorld, order),
+                  "mountain-constrained route should still create a transit");
+    test::require(!fastWorld.activeTransits.empty() && !slowWorld.activeTransits.empty(),
+                  "comparison routes should both yield active transits");
+
+    const auto& fastTransit = fastWorld.activeTransits.front();
+    const auto& slowTransit = slowWorld.activeTransits.front();
+    test::require(slowTransit.speedTilesPerSecond < fastTransit.speedTilesPerSecond,
+                  "mountain-constrained routes should travel slower than open lanes");
+    test::require(slowTransit.troops < fastTransit.troops,
+                  "mountain-constrained routes should bottleneck launched troops");
 }
 
 TEST_CASE(sim_movement_and_friendly_merge_work) {
