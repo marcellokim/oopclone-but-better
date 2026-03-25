@@ -144,6 +144,13 @@ void App::handleKeyPressed(const sf::Event::KeyPressed& keyPressed) {
 }
 
 void App::handleMouseMoved(const sf::Event::MouseMoved& mouseMoved) {
+    if (m_scene == Scene::NationSelect) {
+        if (const auto hoveredNation = m_renderer.selectionFromPixel(mouseMoved.position)) {
+            m_selectedNation = *hoveredNation;
+        }
+        return;
+    }
+
     if (m_scene != Scene::Match) {
         return;
     }

@@ -1,9 +1,11 @@
 #include "game/ui/Renderer.hpp"
 
 #include "RendererDetail.hpp"
+#include "game/ui/VisualTuning.hpp"
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/System/Clock.hpp>
 
 namespace game::ui {
 
@@ -91,24 +93,34 @@ void Renderer::drawSelectionHero(sf::RenderTarget& target, const SelectionLayout
 void Renderer::drawSelectionNationCards(sf::RenderTarget& target,
                                         const SelectionLayout& layout,
                                         const NationId highlightedNation) const {
+    static sf::Clock animationClock;
+    const float timeSeconds = animationClock.getElapsedTime().asSeconds();
     const auto nations = playableNations();
     for (std::size_t index = 0; index < nations.size(); ++index) {
         const auto nation = nations[index];
         const auto& profile = nationDefinition(nation);
         const auto rect = layout.nationCards[index];
         const bool highlighted = highlightedNation == nation;
-        const auto nationAccent = detail::brighten(nationColor(nation), highlighted ? 1.18F : 1.0F);
+        const float pulse = nationCardAccentPulse(highlighted, timeSeconds);
+        const auto nationAccent = detail::brighten(nationColor(nation), highlighted ? (1.12F + pulse * 0.12F) : 1.0F);
 
         drawPanel(target,
                   rect,
                   detail::withAlpha(detail::mix(detail::kShell, nationAccent, 0.12F), 246),
                   detail::withAlpha(detail::mix(detail::kCore, nationAccent, 0.06F), 244),
-                  detail::withAlpha(nationAccent, highlighted ? 220 : 140),
+                  detail::withAlpha(nationAccent, highlighted ? static_cast<std::uint8_t>(208 + pulse * 34.F) : 140),
                   highlighted);
+
+        if (highlighted) {
+            sf::RectangleShape glow({rect.size.x + 12.F, rect.size.y + 12.F});
+            glow.setPosition({rect.position.x - 6.F, rect.position.y - 6.F});
+            glow.setFillColor(detail::withAlpha(nationAccent, static_cast<std::uint8_t>(20 + pulse * 28.F)));
+            target.draw(glow);
+        }
 
         sf::RectangleShape accentBand({6.F, rect.size.y - 24.F});
         accentBand.setPosition({rect.position.x + 12.F, rect.position.y + 12.F});
-        accentBand.setFillColor(detail::withAlpha(nationAccent, 220));
+        accentBand.setFillColor(detail::withAlpha(nationAccent, highlighted ? static_cast<std::uint8_t>(196 + pulse * 48.F) : 220));
         target.draw(accentBand);
 
         drawText(target,
@@ -123,7 +135,7 @@ void Renderer::drawSelectionNationCards(sf::RenderTarget& target,
                  std::string(profile.name),
                  {rect.position.x + 34.F, rect.position.y + 74.F},
                  30,
-                 detail::kTextPrimary,
+                 highlighted ? detail::brighten(detail::kTextPrimary, 1.03F + pulse * 0.02F) : detail::kTextPrimary,
                  FontRole::Display,
                  false,
                  0.94F);

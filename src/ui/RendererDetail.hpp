@@ -155,7 +155,7 @@ inline std::string standingStatus(const bool alive, const bool player) {
 
 inline std::string selectedTileSummary(const sim::WorldState& world) {
     if (!world.selectedTile.has_value()) {
-        return "Select an owned tile, then choose a friendly or enemy tile to move or attack.";
+        return "Select an owned tile, then click a friendly or enemy destination to move or attack.";
     }
 
     const auto coord = *world.selectedTile;
@@ -175,6 +175,29 @@ inline void drawLine(sf::RenderTarget& target,
     line[1].position = end;
     line[1].color = color;
     target.draw(line);
+}
+
+inline void drawBeam(sf::RenderTarget& target,
+                     const sf::Vector2f start,
+                     const sf::Vector2f end,
+                     const float thickness,
+                     const sf::Color color) {
+    const sf::Vector2f delta{end.x - start.x, end.y - start.y};
+    const float length = std::sqrt(delta.x * delta.x + delta.y * delta.y);
+    if (length < 0.001F) {
+        return;
+    }
+
+    const sf::Vector2f normal{-delta.y / length * (thickness / 2.F), delta.x / length * (thickness / 2.F)};
+    sf::VertexArray quad(sf::PrimitiveType::TriangleStrip, 4);
+    quad[0].position = {start.x + normal.x, start.y + normal.y};
+    quad[1].position = {start.x - normal.x, start.y - normal.y};
+    quad[2].position = {end.x + normal.x, end.y + normal.y};
+    quad[3].position = {end.x - normal.x, end.y - normal.y};
+    for (std::size_t i = 0; i < quad.getVertexCount(); ++i) {
+        quad[i].color = color;
+    }
+    target.draw(quad);
 }
 
 } // namespace game::ui::detail

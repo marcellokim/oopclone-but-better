@@ -33,6 +33,7 @@ set(CORE_SOURCES
   src/ai/AiDirector.cpp
   src/ui/InputController.cpp
   src/ui/HoverPanel.cpp
+  src/ui/VisualTuning.cpp
 )
 
 set(RENDERER_SOURCES
@@ -62,6 +63,7 @@ add_executable(territory_war_tests
   tests/victory_conditions_test.cpp
   tests/input_command_test.cpp
   tests/renderer_layout_test.cpp
+  tests/ui_visual_tuning_test.cpp
   ${RENDERER_SOURCES}
 )
 target_include_directories(territory_war_tests PRIVATE include tests)

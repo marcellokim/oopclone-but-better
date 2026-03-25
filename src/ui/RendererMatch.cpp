@@ -1,9 +1,11 @@
 #include "game/ui/Renderer.hpp"
 
 #include "RendererDetail.hpp"
+#include "game/ui/VisualTuning.hpp"
 
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/System/Clock.hpp>
 
 namespace game::ui {
 
@@ -69,6 +71,8 @@ void Renderer::drawMatchTopStrip(sf::RenderTarget& target,
 }
 
 void Renderer::drawMatchMap(sf::RenderTarget& target, const MatchLayout& layout, const sim::WorldState& world) const {
+    static sf::Clock animationClock;
+    const float timeSeconds = animationClock.getElapsedTime().asSeconds();
     drawPanel(target,
               layout.mapShell,
               detail::withAlpha(detail::kShell, 248),
@@ -96,19 +100,27 @@ void Renderer::drawMatchMap(sf::RenderTarget& target, const MatchLayout& layout,
 
             const bool selected = world.selectedTile && *world.selectedTile == coord;
             const bool hovered = world.hoveredTile && *world.hoveredTile == coord;
+            const auto tuning = tileVisualTuning(selected, hovered, tile.hasCapital, timeSeconds);
+
+            if (tuning.glowAlpha > 0) {
+                sf::RectangleShape glow({tileSize.x + tuning.glowPadding * 2.F, tileSize.y + tuning.glowPadding * 2.F});
+                glow.setPosition({tilePos.x - tuning.glowPadding, tilePos.y - tuning.glowPadding});
+                glow.setFillColor(detail::withAlpha(nationColor(tile.owner), tuning.glowAlpha));
+                target.draw(glow);
+            }
 
             sf::RectangleShape outer(tileSize);
             outer.setPosition(tilePos);
-            outer.setFillColor(detail::brighten(tileColor(tile), selected ? 1.08F : 1.0F));
-            outer.setOutlineThickness(selected ? 3.F : (hovered ? 2.F : 1.F));
-            outer.setOutlineColor(selected ? detail::withAlpha(detail::kAccent, 240)
-                                          : (hovered ? detail::withAlpha(sf::Color::White, 180)
-                                                     : detail::withAlpha(detail::kBorder, 95)));
+            outer.setFillColor(detail::brighten(tileColor(tile), tuning.fillBoost));
+            outer.setOutlineThickness(tuning.outlineThickness);
+            outer.setOutlineColor(selected ? detail::withAlpha(detail::kAccent, tuning.outlineAlpha)
+                                          : (hovered ? detail::withAlpha(sf::Color::White, tuning.outlineAlpha)
+                                                     : detail::withAlpha(detail::kBorder, tuning.outlineAlpha)));
             target.draw(outer);
 
             sf::RectangleShape inner({tileSize.x - 10.F, tileSize.y - 10.F});
             inner.setPosition({tilePos.x + 5.F, tilePos.y + 5.F});
-            inner.setFillColor(detail::withAlpha(detail::brighten(tileColor(tile), tile.hasCapital ? 1.12F : 0.9F), 220));
+            inner.setFillColor(detail::withAlpha(detail::brighten(tileColor(tile), tuning.innerBoost), tuning.innerAlpha));
             target.draw(inner);
 
             if (tile.terrain == TerrainType::Road) {
@@ -124,13 +136,18 @@ void Renderer::drawMatchMap(sf::RenderTarget& target, const MatchLayout& layout,
                 target.draw(ridge);
             }
             if (tile.hasCapital) {
-                sf::CircleShape halo(layout.tileSize * 0.28F);
-                halo.setOrigin({layout.tileSize * 0.28F, layout.tileSize * 0.28F});
+                sf::CircleShape halo(layout.tileSize * tuning.capitalHaloScale);
+                halo.setOrigin({layout.tileSize * tuning.capitalHaloScale, layout.tileSize * tuning.capitalHaloScale});
                 halo.setPosition({tilePos.x + tileSize.x / 2.F, tilePos.y + tileSize.y / 2.F});
-                halo.setFillColor(detail::withAlpha(nationColor(tile.owner), 55));
+                halo.setFillColor(detail::withAlpha(nationColor(tile.owner), tuning.capitalHaloAlpha));
                 target.draw(halo);
-                sf::RectangleShape crest({14.F, 14.F});
-                crest.setPosition({tilePos.x + tileSize.x - 20.F, tilePos.y + 6.F});
+                sf::RectangleShape beacon({4.F, tuning.capitalBeaconHeight});
+                beacon.setPosition({tilePos.x + tileSize.x / 2.F - 2.F, tilePos.y - tuning.capitalBeaconHeight + 4.F});
+                beacon.setFillColor(detail::withAlpha(detail::kAccent, detail::withAlpha(detail::kAccent, tuning.capitalHaloAlpha).a));
+                target.draw(beacon);
+                const float crestSize = 14.F * tuning.capitalCrestScale;
+                sf::RectangleShape crest({crestSize, crestSize});
+                crest.setPosition({tilePos.x + tileSize.x - crestSize - 6.F, tilePos.y + 6.F});
                 crest.setFillColor(detail::withAlpha(detail::kAccent, 200));
                 crest.setOutlineThickness(1.F);
                 crest.setOutlineColor(detail::withAlpha(sf::Color::White, 120));
@@ -140,9 +157,9 @@ void Renderer::drawMatchMap(sf::RenderTarget& target, const MatchLayout& layout,
             const auto troopChipRect = detail::makeRect(tilePos.x + 6.F, tilePos.y + tileSize.y - 24.F, tileSize.x - 12.F, 18.F);
             sf::RectangleShape troopChip({troopChipRect.size.x, troopChipRect.size.y});
             troopChip.setPosition(troopChipRect.position);
-            troopChip.setFillColor(detail::withAlpha(sf::Color(8, 11, 16), 175));
+            troopChip.setFillColor(detail::withAlpha(sf::Color(8, 11, 16), tuning.troopChipAlpha));
             troopChip.setOutlineThickness(1.F);
-            troopChip.setOutlineColor(detail::withAlpha(sf::Color::White, 40));
+            troopChip.setOutlineColor(detail::withAlpha(sf::Color::White, tuning.troopChipOutlineAlpha));
             target.draw(troopChip);
             drawText(target,
                      std::to_string(tile.troops),
@@ -160,6 +177,8 @@ void Renderer::drawMatchMap(sf::RenderTarget& target, const MatchLayout& layout,
 void Renderer::drawActiveTransits(sf::RenderTarget& target,
                                   const MatchLayout& layout,
                                   const sim::WorldState& world) const {
+    static sf::Clock animationClock;
+    const auto transitTuning = transitVisualTuning(animationClock.getElapsedTime().asSeconds());
     for (const auto& transit : world.activeTransits) {
         sim::TileCoord nextCoord = transit.destination;
         sim::TileCoord prevCoord = transit.origin;
@@ -177,15 +196,22 @@ void Renderer::drawActiveTransits(sf::RenderTarget& target,
         const sf::Vector2f current{start.x + (end.x - start.x) * transit.progressToNext,
                                    start.y + (end.y - start.y) * transit.progressToNext};
 
-        detail::drawLine(target, start, current, detail::withAlpha(nationColor(transit.owner), 120));
+        detail::drawBeam(target, start, current, transitTuning.haloThickness, detail::withAlpha(nationColor(transit.owner), transitTuning.haloAlpha));
+        detail::drawBeam(target, start, current, transitTuning.beamThickness, detail::withAlpha(nationColor(transit.owner), transitTuning.beamAlpha));
 
-        sf::CircleShape token(10.F);
-        token.setOrigin({10.F, 10.F});
+        sf::CircleShape token(transitTuning.tokenRadius);
+        token.setOrigin({transitTuning.tokenRadius, transitTuning.tokenRadius});
         token.setPosition(current);
         token.setFillColor(detail::brighten(nationColor(transit.owner), 1.08F));
         token.setOutlineThickness(2.F);
         token.setOutlineColor(detail::withAlpha(sf::Color::Black, 170));
         target.draw(token);
+        sf::RectangleShape labelChip({36.F, 18.F});
+        labelChip.setPosition({current.x - 18.F, current.y - 34.F});
+        labelChip.setFillColor(detail::withAlpha(sf::Color(8, 11, 16), transitTuning.labelChipAlpha));
+        labelChip.setOutlineThickness(1.F);
+        labelChip.setOutlineColor(detail::withAlpha(sf::Color::White, 44));
+        target.draw(labelChip);
         drawText(target,
                  std::to_string(transit.troops),
                  {current.x, current.y - 20.F},

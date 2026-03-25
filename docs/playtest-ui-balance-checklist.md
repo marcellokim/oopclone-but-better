@@ -7,10 +7,13 @@ Goal: verify that readability, hierarchy, and command clarity improved during re
 - Date:
 - Tester:
 - Build / commit:
+- Integrated worker commits / cherry-picks:
 - Resolution / window size:
 - Font path used:
+- Fallback path exercised (yes/no):
 - Match length:
 - Nation played:
+- Automation evidence doc:
 
 ## Rating Scale
 - **5** — effortless / immediately clear
@@ -20,6 +23,17 @@ Goal: verify that readability, hierarchy, and command clarity improved during re
 - **1** — major usability problem
 
 Record both a numeric score and a short note for each section.
+
+## Preflight Regression Gate
+Capture the automated and smoke checks that justify running the playtest on this build.
+
+- `cmake -S . -B build`:
+- `cmake --build build -j4 --target territory_war territory_war_tests`:
+- `ctest --test-dir build --output-on-failure`:
+- Runtime smoke (`./build/territory_war` or equivalent bounded launch):
+- Geometry / hit-testing spot check completed:
+- Bundled-font path verified:
+- Fallback-font path verified:
 
 ---
 
@@ -43,6 +57,9 @@ Record both a numeric score and a short note for each section.
 - Reduce right-rail visual dominance if it competes with the map
 - Raise send-ratio chip contrast or position prominence
 
+### Applied delta(s) after this scenario
+- [ ]
+
 ---
 
 ## 2. Hierarchy Under Intent Selection
@@ -62,6 +79,9 @@ Record both a numeric score and a short note for each section.
 - Strengthen selected outline/glow before increasing hover effects
 - Reduce hover intensity if it competes with selection
 - Simplify command-preview copy if it delays recognition
+
+### Applied delta(s) after this scenario
+- [ ]
 
 ---
 
@@ -84,6 +104,9 @@ Record both a numeric score and a short note for each section.
 - Raise capital marker separation from normal tile styling
 - Reduce decorative layers on busy regions first
 
+### Applied delta(s) after this scenario
+- [ ]
+
 ---
 
 ## 4. Input Confidence Under Pressure
@@ -103,6 +126,9 @@ Record both a numeric score and a short note for each section.
 - Re-check shared geometry source for draw vs hit-testing
 - Increase active tile spacing or edge separation
 - Reduce ornamental overlap near selectable surfaces
+
+### Applied delta(s) after this scenario
+- [ ]
 
 ---
 
@@ -125,6 +151,9 @@ Record both a numeric score and a short note for each section.
 - Demote low-value copy to lighter styling
 - Shorten labels before shrinking panels
 
+### Applied delta(s) after this scenario
+- [ ]
+
 ---
 
 ## 6. Nation Select Dossier Quality
@@ -145,6 +174,9 @@ Record both a numeric score and a short note for each section.
 - Increase asymmetry between cards only if click clarity stays intact
 - Reduce card text density before shrinking font size
 
+### Applied delta(s) after this scenario
+- [ ]
+
 ---
 
 ## 7. Debrief / Game-Over Comprehension
@@ -164,6 +196,9 @@ Record both a numeric score and a short note for each section.
 - Increase headline-to-subheadline contrast
 - Separate standings rows more clearly
 - Increase replay instruction contrast near the bottom of the panel
+
+### Applied delta(s) after this scenario
+- [ ]
 
 ---
 
@@ -190,3 +225,10 @@ Record both a numeric score and a short note for each section.
 - [ ]
 - [ ]
 - [ ]
+
+## Regression Confidence Summary
+- Control semantics preserved:
+- Draw geometry and hit-testing still aligned:
+- Preferred bundled fonts render correctly:
+- Graceful fallback path still renders correctly:
+- Remaining concerns / follow-up verification:
