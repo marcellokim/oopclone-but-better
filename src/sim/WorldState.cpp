@@ -6,18 +6,235 @@
 namespace game::sim {
 
 namespace {
-void assignTerritoryPatch(WorldState& world, const TileCoord center, const NationId nation, const int troopsPerTile) {
-    for (int dy = -1; dy <= 1; ++dy) {
-        for (int dx = -1; dx <= 1; ++dx) {
-            const TileCoord coord{center.x + dx, center.y + dy};
-            if (!inBounds(world, coord)) {
-                continue;
-            }
-
-            auto& tile = tileAt(world, coord);
-            tile.owner = nation;
-            tile.troops = troopsPerTile;
+template <std::size_t N>
+void paintTerrain(WorldState& world, const std::array<TileCoord, N>& coords, const TerrainType terrain) {
+    for (const auto coord : coords) {
+        if (!inBounds(world, coord)) {
+            continue;
         }
+
+        tileAt(world, coord).terrain = terrain;
+    }
+}
+
+template <std::size_t N>
+void claimTerritory(WorldState& world,
+                    const std::array<TileCoord, N>& coords,
+                    const NationId nation,
+                    const int troopsPerTile) {
+    for (const auto coord : coords) {
+        if (!inBounds(world, coord)) {
+            continue;
+        }
+
+        auto& tile = tileAt(world, coord);
+        tile.owner = nation;
+        tile.troops = troopsPerTile;
+    }
+}
+
+void placeCapital(WorldState& world,
+                  const std::size_t nationSlot,
+                  const NationId nation,
+                  const TileCoord capital,
+                  const MatchConfig& config) {
+    world.nationStates.at(nationSlot).capital = capital;
+
+    auto& tile = tileAt(world, capital);
+    tile.owner = nation;
+    tile.troops = config.capitalTroops;
+    tile.terrain = TerrainType::Capital;
+    tile.hasCapital = true;
+}
+
+void paintHandcraftedTerrain(WorldState& world) {
+    paintTerrain(world,
+                 std::array<TileCoord, 14>{{
+                     {3, 3},
+                     {4, 3},
+                     {5, 3},
+                     {1, 8},
+                     {2, 8},
+                     {3, 8},
+                     {2, 9},
+                     {3, 9},
+                     {4, 9},
+                     {7, 6},
+                     {8, 6},
+                     {10, 6},
+                     {13, 8},
+                     {14, 8},
+                 }},
+                 TerrainType::Highland);
+
+    paintTerrain(world,
+                 std::array<TileCoord, 12>{{
+                     {6, 3},
+                     {7, 3},
+                     {10, 3},
+                     {11, 3},
+                     {5, 6},
+                     {6, 6},
+                     {12, 6},
+                     {13, 6},
+                     {5, 8},
+                     {6, 8},
+                     {11, 8},
+                     {12, 8},
+                 }},
+                 TerrainType::Mountain);
+
+    paintTerrain(world,
+                 std::array<TileCoord, 28>{{
+                     {2, 1},
+                     {3, 1},
+                     {4, 1},
+                     {5, 1},
+                     {6, 1},
+                     {6, 2},
+                     {6, 4},
+                     {7, 4},
+                     {8, 4},
+                     {9, 2},
+                     {9, 3},
+                     {9, 4},
+                     {9, 5},
+                     {9, 6},
+                     {9, 7},
+                     {9, 8},
+                     {9, 9},
+                     {10, 2},
+                     {11, 2},
+                     {12, 2},
+                     {13, 2},
+                     {14, 2},
+                     {15, 2},
+                     {3, 10},
+                     {4, 10},
+                     {5, 10},
+                     {6, 10},
+                     {12, 9},
+                 }},
+                 TerrainType::Road);
+
+    paintTerrain(world,
+                 std::array<TileCoord, 8>{{
+                     {13, 9},
+                     {14, 9},
+                     {15, 9},
+                     {12, 8},
+                     {12, 10},
+                     {6, 9},
+                     {10, 4},
+                     {11, 4},
+                 }},
+                 TerrainType::Road);
+
+    paintTerrain(world,
+                 std::array<TileCoord, 21>{{
+                     {6, 0},
+                     {7, 0},
+                     {8, 0},
+                     {9, 0},
+                     {10, 0},
+                     {7, 1},
+                     {8, 1},
+                     {9, 1},
+                     {0, 4},
+                     {0, 5},
+                     {0, 6},
+                     {1, 5},
+                     {1, 6},
+                     {17, 4},
+                     {17, 5},
+                     {17, 6},
+                     {16, 5},
+                     {16, 6},
+                     {7, 11},
+                     {8, 11},
+                     {9, 11},
+                 }},
+                 TerrainType::Sea);
+
+    paintTerrain(world,
+                 std::array<TileCoord, 3>{{
+                     {10, 11},
+                     {8, 10},
+                     {9, 10},
+                 }},
+                 TerrainType::Sea);
+}
+
+void claimOpeningTerritories(WorldState& world, const MatchConfig& config) {
+    claimTerritory(world,
+                   std::array<TileCoord, 9>{{
+                       {1, 0},
+                       {2, 0},
+                       {0, 1},
+                       {1, 1},
+                       {2, 1},
+                       {1, 2},
+                       {2, 2},
+                       {3, 1},
+                       {2, 3},
+                   }},
+                   NationId::SwiftLeague,
+                   config.startingTroops);
+
+    claimTerritory(world,
+                   std::array<TileCoord, 9>{{
+                       {16, 0},
+                       {17, 0},
+                       {15, 1},
+                       {16, 1},
+                       {17, 1},
+                       {14, 1},
+                       {15, 2},
+                       {16, 2},
+                       {14, 2},
+                   }},
+                   NationId::IronLegion,
+                   config.startingTroops);
+
+    claimTerritory(world,
+                   std::array<TileCoord, 9>{{
+                       {0, 10},
+                       {1, 9},
+                       {1, 10},
+                       {2, 9},
+                       {2, 10},
+                       {1, 11},
+                       {2, 11},
+                       {2, 8},
+                       {3, 9},
+                   }},
+                   NationId::BastionDirectorate,
+                   config.startingTroops);
+
+    claimTerritory(world,
+                   std::array<TileCoord, 9>{{
+                       {13, 9},
+                       {14, 9},
+                       {15, 9},
+                       {16, 9},
+                       {14, 10},
+                       {15, 10},
+                       {16, 10},
+                       {15, 11},
+                       {14, 8},
+                   }},
+                   NationId::CrownConsortium,
+                   config.startingTroops);
+
+    const std::array<TileCoord, 4> capitals{{
+        {1, 1},
+        {16, 1},
+        {1, world.height - 2},
+        {world.width - 2, world.height - 2},
+    }};
+
+    for (std::size_t index = 0; index < playableNations().size(); ++index) {
+        placeCapital(world, index, playableNations().at(index), capitals.at(index), config);
     }
 }
 } // namespace
@@ -157,49 +374,8 @@ WorldState createInitialWorld(const NationId playerNation, const MatchConfig& co
         }
     }
 
-    const int middleRow = world.height / 2;
-    const int middleCol = world.width / 2;
-    for (int x = 0; x < world.width; ++x) {
-        tileAt(world, {x, middleRow}).terrain = TerrainType::Road;
-    }
-    for (int y = 0; y < world.height; ++y) {
-        tileAt(world, {middleCol, y}).terrain = TerrainType::Road;
-    }
-
-    const std::array<TileCoord, 4> capitals{{
-        {1, 1},
-        {world.width - 2, 1},
-        {1, world.height - 2},
-        {world.width - 2, world.height - 2},
-    }};
-
-    for (std::size_t index = 0; index < playableNations().size(); ++index) {
-        const auto nation = playableNations().at(index);
-        const auto capital = capitals.at(index);
-        world.nationStates.at(index).capital = capital;
-        assignTerritoryPatch(world, capital, nation, config.startingTroops);
-        auto& capitalTile = tileAt(world, capital);
-        capitalTile.owner = nation;
-        capitalTile.troops = config.capitalTroops;
-        capitalTile.terrain = TerrainType::Capital;
-        capitalTile.hasCapital = true;
-    }
-
-    for (const TileCoord highland : std::array<TileCoord, 8>{{
-             {4, 3},
-             {world.width - 5, 3},
-             {4, world.height - 4},
-             {world.width - 5, world.height - 4},
-             {middleCol - 2, middleRow - 1},
-             {middleCol + 2, middleRow - 1},
-             {middleCol - 2, middleRow + 1},
-             {middleCol + 2, middleRow + 1},
-         }}) {
-        auto& tile = tileAt(world, highland);
-        if (!tile.hasCapital) {
-            tile.terrain = TerrainType::Highland;
-        }
-    }
+    paintHandcraftedTerrain(world);
+    claimOpeningTerritories(world, config);
 
     refreshNationState(world);
     return world;

@@ -18,6 +18,8 @@ enum class TerrainType : std::uint8_t {
     Plains = 0,
     Road,
     Highland,
+    Mountain,
+    Sea,
     Capital
 };
 
@@ -30,6 +32,9 @@ struct Rgb {
 struct NationDefinition {
     NationId id{NationId::Neutral};
     std::string_view name{};
+    std::string_view compactName{};
+    std::string_view doctrineLine{};
+    std::string_view doctrineTag{};
     float mobility{1.F};
     float attack{1.F};
     float defense{1.F};
@@ -54,9 +59,14 @@ const MatchConfig& defaultMatchConfig();
 const NationDefinition& nationDefinition(NationId id);
 const std::array<NationId, 4>& playableNations();
 std::string_view nationName(NationId id);
+std::string_view nationCompactName(NationId id);
+std::string_view nationDoctrineLine(NationId id);
+std::string_view nationDoctrineTag(NationId id);
 std::string_view terrainName(TerrainType terrain);
 float terrainDefenseBonus(TerrainType terrain);
 float terrainMovementMultiplier(TerrainType terrain);
+int terrainThroughputCap(TerrainType terrain);
+bool terrainPassableForLand(TerrainType terrain);
 bool isPlayableNation(NationId id);
 
 } // namespace game
