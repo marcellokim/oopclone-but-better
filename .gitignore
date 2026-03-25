@@ -2,13 +2,5 @@ build/
 cmake-build-*/
 .DS_Store
 .idea/
-.omx/logs/
-.omx/screens/
-.omx/state/
-.omx/metrics.json
-.omx/hud-config.json
-.omx/setup-scope.json
-.omx/tmux-hook.json
-.omx/drafts/
-.omx/team/
 docs/playtest-runs/
+.omx/
