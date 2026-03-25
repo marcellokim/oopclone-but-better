@@ -1,0 +1,30 @@
+# Context Snapshot — combined-ui-upgrades-phase2
+
+- **Timestamp (UTC):** 2026-03-25T06:45:00Z
+- **Task statement:** Produce a consensus implementation plan that combines four follow-up improvements for the current brownfield C++/SFML strategy game: (1) replace bundled fonts with redistributable fonts, (2) refactor the large renderer, (3) add additional visual polish/animation, and (4) tune UI balance/readability based on actual play.
+- **Desired outcome:** New execution-ready PRD, test spec, and consensus plan for the next phase of the game UI/product polish work.
+- **Known facts / evidence:**
+  - The repository now contains a working SFML 3.0.2 prototype with gameplay, tests, and a completed tactical-command-deck redesign.
+  - Existing planning artifacts: `.omx/plans/prd-realtime-4nation-territory-war.md`, `.omx/plans/test-spec-realtime-4nation-territory-war.md`, `.omx/plans/consensus-realtime-4nation-territory-war.md`, `.omx/plans/autopilot-spec.md`, `.omx/plans/autopilot-impl.md`.
+  - Existing context snapshots: `.omx/context/realtime-4nation-territory-war-20260325T050515Z.md`, `.omx/context/realtime-4nation-territory-war-redesign-20260325T060312Z.md`.
+  - Current redesign validation approved the new UI and identified two non-blocking follow-ups: font asset portability/licensing and renderer maintainability.
+  - The user explicitly wants all four previously suggested improvements combined into one plan: font replacement, renderer refactor, visual polish/animation, and actual-play UI balancing.
+- **Constraints:**
+  - Planning only for this turn (`$ralplan`); do not implement changes yet.
+  - Preserve existing gameplay rules, controls, deterministic simulation, and verification discipline.
+  - Keep scope brownfield and incremental rather than rewriting the engine.
+  - No new runtime code dependencies unless clearly justified in the plan.
+- **Unknowns / open questions:**
+  - Which redistributable font family should replace the current locally copied system fonts.
+  - How far to go on animation/polish while staying lightweight in SFML.
+  - What specific playtest scenarios should drive UI balance/readability tuning.
+- **Likely codebase touchpoints:**
+  - `src/ui/Renderer.cpp`
+  - `include/game/ui/Renderer.hpp`
+  - `src/App.cpp`
+  - `assets/fonts/`
+  - `docs/` for any new style or playtest guidance
+  - `tests/` if UI-related acceptance coverage expands
+- **Planning stance:**
+  - Treat this as phase-2 productization/polish work on top of a validated brownfield prototype.
+  - Combine the four follow-up themes into one coherent plan rather than four isolated mini-projects.
