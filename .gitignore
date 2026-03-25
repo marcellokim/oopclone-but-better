@@ -9,3 +9,5 @@ cmake-build-*/
 .omx/hud-config.json
 .omx/setup-scope.json
 .omx/tmux-hook.json
+.omx/drafts/
+.omx/team/
