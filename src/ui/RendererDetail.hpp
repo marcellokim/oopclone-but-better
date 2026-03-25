@@ -115,51 +115,15 @@ inline std::vector<std::filesystem::path> monoFontCandidates() {
 }
 
 inline std::string doctrineLine(const NationId nation) {
-    switch (nation) {
-    case NationId::SwiftLeague:
-        return "Precision tempo through contestable lanes.";
-    case NationId::IronLegion:
-        return "Disciplined stability with balanced fronts.";
-    case NationId::BastionDirectorate:
-        return "Infrastructure pressure through road control.";
-    case NationId::CrownConsortium:
-        return "Adaptive central command with flexible reserves.";
-    case NationId::Neutral:
-        return "Unaligned territory.";
-    }
-    return {};
+    return std::string(nationDoctrineLine(nation));
 }
 
 inline std::string compactNationName(const NationId nation) {
-    switch (nation) {
-    case NationId::SwiftLeague:
-        return "서강";
-    case NationId::IronLegion:
-        return "성균관";
-    case NationId::BastionDirectorate:
-        return "한양";
-    case NationId::CrownConsortium:
-        return "중앙";
-    case NationId::Neutral:
-        return "Neutral";
-    }
-    return {};
+    return std::string(nationCompactName(nation));
 }
 
 inline std::string doctrineTag(const NationId nation) {
-    switch (nation) {
-    case NationId::SwiftLeague:
-        return "precision lanes";
-    case NationId::IronLegion:
-        return "balanced basin";
-    case NationId::BastionDirectorate:
-        return "infrastructure push";
-    case NationId::CrownConsortium:
-        return "adaptive center";
-    case NationId::Neutral:
-        return "neutral";
-    }
-    return {};
+    return std::string(nationDoctrineTag(nation));
 }
 
 inline std::string standingStatus(const bool alive, const bool player) {

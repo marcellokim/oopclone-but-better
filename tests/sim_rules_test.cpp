@@ -12,9 +12,15 @@
 
 namespace {
 
+constexpr std::array<game::TerrainType, 6> kKnownTerrainTypes{game::TerrainType::Plains,
+                                                               game::TerrainType::Road,
+                                                               game::TerrainType::Highland,
+                                                               game::TerrainType::Mountain,
+                                                               game::TerrainType::Sea,
+                                                               game::TerrainType::Capital};
+
 std::optional<game::TerrainType> terrainNamed(const std::string_view target) {
-    for (int rawValue = 0; rawValue < 8; ++rawValue) {
-        const auto terrain = static_cast<game::TerrainType>(rawValue);
+    for (const auto terrain : kKnownTerrainTypes) {
         if (game::terrainName(terrain) == target) {
             return terrain;
         }
@@ -94,6 +100,23 @@ TEST_CASE(sim_world_layout_adds_sea_mountain_and_irregular_opening_territories) 
         test::require(ownedTiles > 0, "each playable nation should still own starting territory");
         test::require(boundingArea > ownedTiles,
                       "opening territories should no longer be perfect rectangles around each capital");
+    }
+}
+
+TEST_CASE(sim_opening_territories_do_not_claim_impassable_sea_tiles) {
+    const auto world = game::sim::createInitialWorld(game::NationId::SwiftLeague);
+
+    for (const auto nation : game::playableNations()) {
+        for (int y = 0; y < world.height; ++y) {
+            for (int x = 0; x < world.width; ++x) {
+                const auto& tile = game::sim::tileAt(world, {x, y});
+                if (tile.owner != nation) {
+                    continue;
+                }
+                test::require(game::terrainPassableForLand(tile.terrain) || tile.hasCapital,
+                              "starting/owned faction territory should not sit on impassable sea tiles");
+            }
+        }
     }
 }
 

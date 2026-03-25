@@ -12,10 +12,15 @@ namespace {
 constexpr int kMapOriginX = 75;
 constexpr int kMapOriginY = 158;
 constexpr int kTileSize = 43;
+constexpr std::array<game::TerrainType, 6> kKnownTerrainTypes{game::TerrainType::Plains,
+                                                               game::TerrainType::Road,
+                                                               game::TerrainType::Highland,
+                                                               game::TerrainType::Mountain,
+                                                               game::TerrainType::Sea,
+                                                               game::TerrainType::Capital};
 
 std::optional<game::TerrainType> terrainNamed(const std::string_view target) {
-    for (int rawValue = 0; rawValue < 8; ++rawValue) {
-        const auto terrain = static_cast<game::TerrainType>(rawValue);
+    for (const auto terrain : kKnownTerrainTypes) {
         if (game::terrainName(terrain) == target) {
             return terrain;
         }
@@ -52,25 +57,16 @@ TEST_CASE(renderer_selection_hit_testing_matches_doctrine_cards) {
 
 TEST_CASE(renderer_player_facing_names_follow_university_retheme) {
     const auto nations = game::playableNations();
-    const std::array<std::string_view, 4> expectedNames{{
-        "서강대학교",
-        "성균관대학교",
-        "한양대학교",
-        "중앙대학교",
-    }};
+    const std::array<std::string_view, 4> expectedNames{{"서강대학교", "한양대학교", "성균관대학교", "중앙대학교"}};
+    const std::array<std::string_view, 4> expectedCompact{{"서강", "한양", "성균관", "중앙"}};
+    const std::array<std::string_view, 4> expectedTags{{"tempo doctrine", "infrastructure doctrine", "stability doctrine", "adaptive doctrine"}};
 
-    for (const auto expectedName : expectedNames) {
-        const bool found = std::any_of(nations.begin(), nations.end(), [expectedName](const game::NationId nation) {
-            return game::nationName(nation) == expectedName;
-        });
-        test::require(found, "playable faction roster should include each university name exactly once player-facing");
-    }
-
-    for (const auto nation : nations) {
-        test::require(!game::nationDoctrineLine(nation).empty(),
-                      "each university faction should expose a non-empty doctrine line");
-        test::require(!game::nationDoctrineTag(nation).empty(),
-                      "each university faction should expose a non-empty doctrine tag");
+    for (std::size_t index = 0; index < nations.size(); ++index) {
+        const auto nation = nations[index];
+        test::require(game::nationName(nation) == expectedNames[index], "university full-name mapping should match the canonical faction order");
+        test::require(game::nationCompactName(nation) == expectedCompact[index], "compact university-name mapping should match canonical config");
+        test::require(game::nationDoctrineTag(nation) == expectedTags[index], "doctrine tag mapping should match canonical config");
+        test::require(!game::nationDoctrineLine(nation).empty(), "each university faction should expose a non-empty doctrine line");
     }
 }
 

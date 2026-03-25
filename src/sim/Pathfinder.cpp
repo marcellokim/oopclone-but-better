@@ -9,7 +9,7 @@ namespace game::sim::Pathfinder {
 namespace {
 
 bool isSeaTile(const WorldState& world, const TileCoord coord) {
-    return terrainName(tileAt(world, coord).terrain) == "Sea";
+    return tileAt(world, coord).terrain == TerrainType::Sea;
 }
 
 } // namespace

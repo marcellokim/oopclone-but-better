@@ -7,12 +7,8 @@ namespace game::ui {
 
 namespace {
 
-bool terrainMatches(const TerrainType terrain, const std::string_view label) {
-    return terrainName(terrain) == label;
-}
-
 std::string movementLine(const TerrainType terrain) {
-    if (terrainMatches(terrain, "Sea")) {
+    if (terrain == TerrainType::Sea) {
         return "Move: blocked for land orders";
     }
 

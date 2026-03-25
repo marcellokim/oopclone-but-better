@@ -16,10 +16,6 @@ namespace game::ui {
 
 namespace {
 
-bool terrainMatches(const TerrainType terrain, const std::string_view label) {
-    return terrainName(terrain) == label;
-}
-
 int pathThroughputCap(const sim::WorldState& world, const std::vector<sim::TileCoord>& path) {
     int bottleneck = std::numeric_limits<int>::max();
     for (const auto& coord : path) {
@@ -191,7 +187,7 @@ void Renderer::drawMatchMap(sf::RenderTarget& target, const MatchLayout& layout,
                 ridge.setFillColor(detail::withAlpha(sf::Color(236, 211, 150), 110));
                 target.draw(ridge);
             }
-            if (terrainMatches(tile.terrain, "Mountain")) {
+            if (tile.terrain == TerrainType::Mountain) {
                 sf::RectangleShape ridgeLeft({tileSize.x - 16.F, 3.F});
                 ridgeLeft.setPosition({tilePos.x + 8.F, tilePos.y + 12.F});
                 ridgeLeft.setRotation(sf::degrees(24.F));
@@ -204,7 +200,7 @@ void Renderer::drawMatchMap(sf::RenderTarget& target, const MatchLayout& layout,
                 ridgeRight.setFillColor(detail::withAlpha(sf::Color(161, 148, 131), 128));
                 target.draw(ridgeRight);
             }
-            if (terrainMatches(tile.terrain, "Sea")) {
+            if (tile.terrain == TerrainType::Sea) {
                 for (int wave = 0; wave < 2; ++wave) {
                     sf::RectangleShape swell({tileSize.x - 14.F, 3.F});
                     swell.setPosition({tilePos.x + 7.F, tilePos.y + 12.F + static_cast<float>(wave) * 10.F});
