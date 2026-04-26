@@ -49,25 +49,42 @@ C++20 + SFML 3 기반으로 제작되었고, 4개 대학 테마 진영의 비대
 
 ## 가장 간편한 배포
 
-배포하는 사람은 한 번만 실행합니다.
+배포하는 사람은 해당 OS에서 한 번만 실행합니다.
 
+macOS:
 ```bash
 ./tools/package_portable.sh --test
 ```
 
+Windows PowerShell:
+```powershell
+.\tools\package_portable.ps1 -Test
+```
+
 생성 파일:
 - `dist/TerritoryWar-macOS-arm64.zip` 같은 OS/CPU별 ZIP
+- `dist/TerritoryWar-Windows-x64.zip` 같은 Windows ZIP
 
-플레이어는 ZIP을 풀고 `Play.command`를 더블클릭하면 됩니다. Git clone, CMake 명령 입력, 빌드 폴더 이동이 필요 없습니다.
+플레이어는 ZIP을 풀고 더블클릭하면 됩니다.
+- macOS: `Play.command`
+- Windows: `Play.bat`
+
+플레이어는 Git clone, CMake 명령 입력, 빌드 폴더 이동이 필요 없습니다.
 
 macOS가 처음 실행을 막으면 `Play.command`를 우클릭한 뒤 `열기`를 선택합니다.
 
 ## 소스에서 바로 실행
 
-개발 중에는 저장소 루트에서 `Play.command`를 더블클릭하거나 아래 명령을 실행합니다.
+개발 중에는 저장소 루트에서 실행 스크립트를 더블클릭하거나 아래 명령을 실행합니다.
 
+macOS:
 ```bash
 ./Play.command
+```
+
+Windows:
+```powershell
+.\Play.bat
 ```
 
 공통 동작:
