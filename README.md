@@ -1,201 +1,193 @@
-# oopclone-but-better
+# Territory War
 
-실시간 2D 영토전 전략 게임 프로토타입입니다.  
-C++20 + SFML 3 기반으로 제작되었고, 4개 대학 테마 진영의 비대칭 능력치와 AI를 바탕으로 타일형 전장에서 수도 함락 또는 전군 소멸을 목표로 싸웁니다.
+Territory War is a playable C++20/SFML 3 real-time strategy prototype where four university-themed factions fight over a handcrafted tile map with asymmetric abilities, AI opponents, command power, and a score debrief.
 
-## 현재 상태
-- 플레이 가능한 프로토타입
-- 4개 대학 진영 선택 가능
-- 실시간 클릭 이동 / 공격
-- 수도 리젠 / 영토 비례 강화
-- 바다 차단 / 산악 병목 / 도로 고속로가 포함된 수제 맵
-- AI 상대 3개 국가 동시 진행
-- Command Power 기반 진영별 액티브 / 패시브 고유기
-- 경기 종료 후 점수 / 등급 기반 debrief
-- 단계별 UI 리디자인 및 phase-2 polish 반영 완료
+## Why It Exists
 
-## 핵심 특징
-- **4개 대학 진영 비대칭**
-  - Sogang Univ.: `Tempo Surge`로 빠른 전개와 launch cap 보정
-  - Hanyang Univ.: `Road Authority`로 도로 기반 전술 기동 강화
-  - Sungkyunkwan Univ.: `Fortified Basin`으로 거점 방어와 수도 리젠 강화
-  - Chung-Ang Univ.: `Adaptive Reserve`로 위협받는 전선 즉시 보강
-- **실시간 타일 전장**
-  - 내 타일 선택 → 아군/적 타일 클릭으로 명령
-- **지형 병목 규칙**
-  - Road는 높은 병력 처리량, Plains/Capital은 기본 처리량, Highland/Mountain은 낮은 처리량
-  - Sea는 일반 지상 이동이 불가능
-- **수도 기반 승패 구조**
-  - 수도 함락 또는 전체 병력 소멸 시 패배
-- **결정론적 시뮬레이션 코어**
-  - 테스트 가능한 fixed-tick 구조
-- **SFML 기반 전술형 UI**
-  - nation select / 전장 HUD / ability panel / score debrief 화면 포함
+This repository demonstrates a small but complete game loop: faction selection, real-time orders, terrain-aware movement, combat, passive and active faction abilities, AI decision-making, victory conditions, and post-match scoring. The code is structured so the simulation rules can be tested independently from the SFML renderer.
 
-## 조작법
-- **좌클릭**: 타일 선택 / 명령
-- **우클릭**: 선택 해제
-- **Esc**: 선택 해제
-- **1 / 2 / 3**: 병력 전송 비율 25% / 50% / 100%
-- **Space**: Command Power가 충분할 때 현재 진영 고유기 발동
-- **Ability panel 클릭**: Space와 동일하게 고유기 발동
-- **Enter 또는 좌클릭**: 결과 화면에서 nation select로 복귀
+## Highlights
 
-## 빌드
-요구 사항:
-- C++20 지원 컴파일러
+- Four playable factions with distinct passives and active abilities:
+  - Sogang Univ. - faster tempo and launch-cap pressure
+  - Hanyang Univ. - road-based mobility and route capacity
+  - Sungkyunkwan Univ. - capital/highland defense and regeneration
+  - Chung-Ang Univ. - adaptive frontline reinforcement
+- Real-time tile command system with 25% / 50% / 100% send ratios.
+- Terrain rules for roads, plains, capitals, highlands, mountains, and sea blockers.
+- Three AI-controlled opponents in every match.
+- Command Power resource, cooldowns, active durations, and AI ability usage.
+- Score and grade debrief sorted by final standings after the match.
+- Regression tests for simulation rules, victory conditions, AI behavior, abilities, scoring, input, renderer layout, and UI tuning.
+
+## Tech Stack
+
+- C++20
+- SFML 3.0.2, fetched through CMake `FetchContent`
 - CMake 3.24+
-- GitHub 접근 가능 네트워크 환경 (SFML을 `FetchContent`로 받아옴)
+- Custom lightweight C++ test harness in `tests/`
+- No runtime environment variables are required.
 
-## 가장 간편한 배포
+## Quick Start For Players
 
-배포하는 사람은 해당 OS에서 한 번만 실행합니다.
+Download the ZIP for your OS, unzip it, then double-click the launcher:
+
+- macOS: `Play.command`
+- Windows: `Play.bat`
+
+Players do not need to clone the repository, run CMake manually, or open a build folder.
+
+macOS Gatekeeper note: if the first launch is blocked, right-click `Play.command` and choose `Open`.
+
+## Create A Shareable ZIP
+
+Build the ZIP on the same OS and CPU architecture you want to distribute.
 
 macOS:
+
 ```bash
 ./tools/package_portable.sh --test
 ```
 
 Windows PowerShell:
+
 ```powershell
 .\tools\package_portable.ps1 -Test
 ```
 
-생성 파일:
-- `dist/TerritoryWar-macOS-arm64.zip` 같은 OS/CPU별 ZIP
-- `dist/TerritoryWar-Windows-x64.zip` 같은 Windows ZIP
+Generated examples:
 
-플레이어는 ZIP을 풀고 더블클릭하면 됩니다.
-- macOS: `Play.command`
-- Windows: `Play.bat`
+- `dist/TerritoryWar-macOS-arm64.zip`
+- `dist/TerritoryWar-Windows-x64.zip`
 
-플레이어는 Git clone, CMake 명령 입력, 빌드 폴더 이동이 필요 없습니다.
+## Run From Source
 
-macOS가 처음 실행을 막으면 `Play.command`를 우클릭한 뒤 `열기`를 선택합니다.
+Prerequisites:
 
-## 소스에서 바로 실행
-
-개발 중에는 저장소 루트에서 실행 스크립트를 더블클릭하거나 아래 명령을 실행합니다.
+- C++20 compiler
+- CMake 3.24+
+- Network access on the first configure, because SFML is downloaded by CMake
+- macOS: Xcode Command Line Tools
+- Windows: Visual Studio Build Tools or another C++20-compatible toolchain
 
 macOS:
+
 ```bash
 ./Play.command
 ```
 
 Windows:
+
 ```powershell
 .\Play.bat
 ```
 
-공통 동작:
-- CMake configure/build를 자동으로 수행합니다.
-- 최초 실행은 SFML을 내려받고 컴파일하므로 시간이 걸릴 수 있습니다.
-- 빌드가 끝나면 `territory_war`를 바로 실행합니다.
+The launcher configures CMake, builds the game, and starts the executable. The first run can take longer because SFML is fetched and compiled.
 
-검증까지 함께 실행:
+Optional build overrides:
+
+- `TERRITORY_WAR_BUILD_DIR`: source-run build directory, default `build/`
+- `TERRITORY_WAR_PACKAGE_BUILD_DIR`: packaging build directory, default `build-package/`
+- `TERRITORY_WAR_CONFIG`: CMake configuration, default `Release`
+
+## Controls
+
+- Left click: select a tile or issue an order
+- Right click / Esc: clear selection
+- `1` / `2` / `3`: send 25% / 50% / 100% of available troops
+- `Space`: activate the current faction ability when Command Power is ready
+- Ability panel click: same as `Space`
+- Enter or left click on debrief: return to faction select
+
+## Build And Test
+
+Configure and build:
+
+```bash
+cmake -S . -B build
+cmake --build build -j4 --target territory_war territory_war_tests territory_war_preview
+```
+
+Run tests:
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+
+Build, test, and launch through the helper:
 
 ```bash
 ./tools/bootstrap_and_run.sh --test
 ```
 
-로컬 설치 복사본 생성:
+Create a local install-style copy without launching:
 
 ```bash
 ./tools/bootstrap_and_run.sh --install --no-run
 ```
 
-생성 위치:
+Output:
+
 - `dist/territory-war/`
 
-설치형 실행 스크립트는 CMake와 C++20 컴파일러가 이미 설치되어 있다고 가정합니다.
-macOS에서는 Xcode Command Line Tools, Windows에서는 Visual Studio Build Tools 또는 동등한 C++ toolchain이 필요합니다.
+## Preview And Playtest Tools
 
-## 수동 빌드
-
-```bash
-cmake -S . -B build
-cmake --build build -j4 --target territory_war territory_war_tests
-```
-
-## 실행
-```bash
-./build/territory_war
-```
-
-## 테스트
-```bash
-ctest --test-dir build --output-on-failure
-```
-
-## 현재 진영 / 지형 기준
-
-### 플레이 가능 진영
-- `Sogang Univ.` — 빠른 타이밍과 정밀 타격
-- `Hanyang Univ.` — 도로 활용과 공격 압박
-- `Sungkyunkwan Univ.` — 방어 효율과 안정적 성장
-- `Chung-Ang Univ.` — 중앙 전선 통제와 적응형 운영
-
-### 지형 규칙
-- `Road` — 빠른 이동, 최대 처리량 72
-- `Plains` / `Capital` — 기본 이동, 최대 처리량 48
-- `Highland` — 약간 느린 이동, 최대 처리량 32
-- `Mountain` — 크게 느린 이동, 최대 처리량 18, 방어 보너스
-- `Sea` — 일반 지상 경로 불가, 처리량 0
-
-## 실제 플레이테스트 모드
-실제 사람 기준 UI/가독성 점검을 빠르게 시작하려면 아래 스크립트를 사용하세요.
-
-```bash
-./tools/start_playtest.sh
-```
-
-앱을 자동 실행하지 않고 리포트만 만들려면:
-
-```bash
-./tools/start_playtest.sh --no-launch
-```
-
-생성 위치:
-- `docs/playtest-runs/playtest-<timestamp>.md`
-- `docs/playtest-ui-balance-checklist.md`
-
-## 오프스크린 프리뷰 렌더
-UI 점검용 preview 이미지를 생성할 수 있습니다.
+Generate offscreen UI preview images:
 
 ```bash
 cmake --build build -j4 --target territory_war_preview
 ./build/territory_war_preview
 ```
 
-생성 위치:
+Generated files:
+
 - `.omx/screens/preview-nation-select.png`
 - `.omx/screens/preview-match.png`
 - `.omx/screens/preview-game-over.png`
 
-## 폰트
-현재 UI는 번들된 재배포 가능 폰트를 사용합니다.
-- Display: IBM Plex Serif
-- Body: Lato
-- Mono: IBM Plex Mono
+Start a manual playtest checklist:
 
-관련 파일:
-- `assets/fonts/README.md`
-- `docs/ui-style-guide.md`
+```bash
+./tools/start_playtest.sh
+```
 
-## 주요 디렉터리
-- `src/` — 애플리케이션 / 시뮬레이션 / UI 구현
-- `include/` — 헤더
-- `tests/` — 회귀 테스트
-- `assets/fonts/` — 번들 폰트
-- `docs/` — UI 스타일 / 플레이테스트 / 검증 문서
-- `.omx/plans/` — 작업 계획 산출물
+Generated files:
 
-## 문서
+- `docs/playtest-runs/playtest-<timestamp>.md`
+- `docs/playtest-ui-balance-checklist.md`
+
+No portfolio screenshots are tracked in the repository yet. The preview renderer above is the current reproducible way to generate local UI images.
+
+## Project Structure
+
+```text
+src/                 Application, simulation, AI, and UI implementation
+include/             Public headers
+tests/               Regression tests
+assets/fonts/        Redistributable UI fonts and font licenses
+tools/               Run, package, preview, and playtest helper scripts
+docs/                UI style, release, smoke-test, and playtest notes
+```
+
+Key implementation areas:
+
+- `src/sim/` - deterministic simulation systems
+- `src/ai/` - AI order and ability decisions
+- `src/ui/` - SFML renderer, layout, input, and HUD views
+- `src/App.cpp` - application loop and scene orchestration
+
+## Documentation
+
 - `docs/manual-smoke-checklist.md`
 - `docs/playtest-ui-balance-checklist.md`
+- `docs/public-release-checklist.md`
 - `docs/ui-style-guide.md`
 - `docs/combined-ui-upgrades-phase2-verification.md`
 
-## 주의 사항
-- 현재는 프로토타입 단계이며, **실제 사람 손으로 하는 최종 플레이테스트**는 추가로 권장됩니다.
-- SFML은 `FetchContent` 기반으로 내려받습니다.
+## Release Notes
+
+Current distribution is intentionally simple: portable ZIP files for macOS and Windows. The project does not currently include code signing, notarization, a store page, CI release automation, or a public demo URL.
+
+## License
+
+Code is distributed under the repository license in `LICENSE`. Bundled fonts are covered by the OFL license files in `assets/fonts/`.

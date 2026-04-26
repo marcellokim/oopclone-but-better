@@ -2,6 +2,11 @@ build/
 build-package/
 cmake-build-*/
 dist/
+.env
+.env.*
+!.env.example
+*.log
+logs/
 .DS_Store
 .idea/
 docs/playtest-runs/
