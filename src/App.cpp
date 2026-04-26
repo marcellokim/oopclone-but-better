@@ -1,6 +1,7 @@
 #include "game/App.hpp"
 
 #include "game/sim/CombatSystem.hpp"
+#include "game/sim/AbilitySystem.hpp"
 #include "game/sim/MovementSystem.hpp"
 #include "game/sim/RegenSystem.hpp"
 #include "game/sim/VictorySystem.hpp"
@@ -59,6 +60,7 @@ void App::updateMatch(const float frameSeconds) {
     m_simAccumulator += frameSeconds;
     while (m_simAccumulator >= m_config.simTickSeconds) {
         m_world.tickCount += 1;
+        sim::AbilitySystem::update(m_world, m_config.simTickSeconds, m_config);
         m_aiDirector.update(m_world, m_commandQueue, m_config.simTickSeconds, m_config);
         sim::MovementSystem::flushOrders(m_world, m_commandQueue, m_config);
         for (const auto& arrival : sim::MovementSystem::update(m_world, m_config.simTickSeconds)) {
@@ -134,6 +136,8 @@ void App::handleKeyPressed(const sf::Event::KeyPressed& keyPressed) {
             m_inputController.setSendRatio(sim::SendRatio::Half);
         } else if (keyPressed.code == sf::Keyboard::Key::Num3) {
             m_inputController.setSendRatio(sim::SendRatio::Full);
+        } else if (keyPressed.code == sf::Keyboard::Key::Space) {
+            static_cast<void>(sim::AbilitySystem::activate(m_world, m_world.playerNation, m_config));
         }
         return;
     }
@@ -168,6 +172,10 @@ void App::handleMousePressed(const sf::Event::MouseButtonPressed& mousePressed) 
         }
 
         if (m_scene == Scene::Match) {
+            if (m_renderer.abilityPanelFromPixel(mousePressed.position)) {
+                static_cast<void>(sim::AbilitySystem::activate(m_world, m_world.playerNation, m_config));
+                return;
+            }
             if (const auto tile = m_renderer.tileFromPixel(m_world, mousePressed.position)) {
                 m_inputController.handleTileClick(m_world, m_world.playerNation, *tile, m_commandQueue);
             }

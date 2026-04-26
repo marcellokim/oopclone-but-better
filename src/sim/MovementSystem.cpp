@@ -1,6 +1,7 @@
 #include "game/sim/MovementSystem.hpp"
 
 #include "game/GameConfig.hpp"
+#include "game/sim/AbilitySystem.hpp"
 #include "game/sim/Pathfinder.hpp"
 
 #include <algorithm>
@@ -51,7 +52,7 @@ bool applyOrder(WorldState& world, const OrderIntent& order, const MatchConfig& 
     }
 
     const int requested = requestedTroops(originTile.troops, order.ratio);
-    const int troopsToSend = std::min(requested, pathThroughputCap(world, path));
+    const int troopsToSend = std::min(requested, pathThroughputCap(world, path) + AbilitySystem::launchCapBonus(world, order.issuer, path));
     if (troopsToSend <= 0 || troopsToSend > originTile.troops) {
         return false;
     }
@@ -68,10 +69,12 @@ bool applyOrder(WorldState& world, const OrderIntent& order, const MatchConfig& 
     transit.origin = order.origin;
     transit.destination = order.target;
     transit.path = path;
-    transit.speedTilesPerSecond = config.transitSpeedTilesPerSecond * nationDefinition(order.issuer).mobility * speedMultiplier;
+    transit.speedTilesPerSecond = config.transitSpeedTilesPerSecond * nationDefinition(order.issuer).mobility * speedMultiplier *
+                                  AbilitySystem::movementSpeedMultiplier(world, order.issuer, path);
     transit.troops = troopsToSend;
     transit.assault = tileAt(world, order.target).owner != order.issuer;
     world.activeTransits.push_back(transit);
+    world.nationStates.at(nationIndex(order.issuer)).stats.ordersIssued += 1;
     return true;
 }
 

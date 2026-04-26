@@ -46,6 +46,7 @@ Capture the automated and smoke checks that justify running the playtest on this
 - Can I instantly identify **my capital**?
 - Can I instantly find the **command rail / operational HUD**?
 - Can I tell what the current **send ratio** is without searching?
+- Can I tell current **Command Power**, ability readiness, and cooldown without searching?
 - If the terrain update is present, can I quickly read coasts, mountain belts, and the main outward lanes?
 - Does the map still feel like the primary object on screen?
 
@@ -58,6 +59,7 @@ Capture the automated and smoke checks that justify running the playtest on this
 - Increase capital distinction vs normal owned tiles
 - Reduce right-rail visual dominance if it competes with the map
 - Raise send-ratio chip contrast or position prominence
+- Raise ability panel contrast or simplify cooldown text
 
 ### Applied delta(s) after this scenario
 - [ ]
@@ -71,6 +73,7 @@ Capture the automated and smoke checks that justify running the playtest on this
 - Is **selected tile** always stronger than **hovered tile**?
 - Is **capital emphasis** still recognizable while another tile is selected?
 - Does the command-preview area reinforce what will happen next?
+- Does the ability panel make the current tactical option feel explicit?
 - Does any panel pull attention away from the active selected tile?
 
 ### Score
@@ -81,6 +84,7 @@ Capture the automated and smoke checks that justify running the playtest on this
 - Strengthen selected outline/glow before increasing hover effects
 - Reduce hover intensity if it competes with selection
 - Simplify command-preview copy if it delays recognition
+- Simplify ability copy if it competes with route preview
 
 ### Applied delta(s) after this scenario
 - [ ]
@@ -117,6 +121,7 @@ Capture the automated and smoke checks that justify running the playtest on this
 
 ### Check
 - Do I trust that clicks land on the intended tile/card?
+- Do I trust that ability-panel clicks do not issue map commands?
 - Does the UI make command state feel explicit rather than ambiguous?
 - Do hover and selection effects support fast action instead of delaying it?
 - Is there any mismatch between what looks clickable and what actually responds?
@@ -129,6 +134,7 @@ Capture the automated and smoke checks that justify running the playtest on this
 - Re-check shared geometry source for draw vs hit-testing
 - Increase active tile spacing or edge separation
 - Reduce ornamental overlap near selectable surfaces
+- Re-check ability panel hit-testing against map tile hit-testing
 
 ### Applied delta(s) after this scenario
 - [ ]
@@ -140,7 +146,7 @@ Capture the automated and smoke checks that justify running the playtest on this
 
 ### Check
 - Is the right rail **helpful**, or does it feel like too much chrome?
-- Are commander, hover intel, live fronts, and objective grouped in a useful order?
+- Are commander, ability, hover intel, route preview, live fronts, and objective grouped in a useful order?
 - Does any section feel redundant?
 - Do I ignore any panel entirely for the whole match?
 
@@ -164,6 +170,7 @@ Capture the automated and smoke checks that justify running the playtest on this
 
 ### Check
 - Does each doctrine card feel distinct in identity, not just color?
+- Do passive and active ability summaries make the faction choice clearer?
 - Are the university-themed names and doctrine lines respectful, playful, and strategy-focused?
 - Are stats readable without visual overload?
 - Is the currently hovered/selected doctrine clearly emphasized?
@@ -188,7 +195,7 @@ Capture the automated and smoke checks that justify running the playtest on this
 
 ### Check
 - Can I tell **winner vs stalemate** immediately?
-- Are standings easy to scan in rank-like order?
+- Are standings easy to scan in score order with grade and ability usage?
 - Does the debrief panel feel distinct from the live HUD?
 - Is the replay / return instruction obvious?
 
@@ -215,6 +222,7 @@ Capture the automated and smoke checks that justify running the playtest on this
 - Info density:
 - Nation select quality:
 - Debrief comprehension:
+- Ability readiness clarity:
 
 ### Go / Hold Decision
 - **GO** — no category below 4
@@ -236,5 +244,6 @@ Capture the automated and smoke checks that justify running the playtest on this
 - Preferred bundled fonts render correctly:
 - Graceful fallback path still renders correctly:
 - Terrain semantics stay readable under live-match pressure:
+- Command Power, ability cooldowns, AI ability use, and score debrief stayed legible:
 - University retheme remains respectful in all player-facing copy:
 - Remaining concerns / follow-up verification:

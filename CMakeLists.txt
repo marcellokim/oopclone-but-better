@@ -7,6 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
+include(GNUInstallDirs)
 
 FetchContent_Declare(
   SFML
@@ -26,6 +27,8 @@ set(CORE_SOURCES
   src/sim/ArmyTransit.cpp
   src/sim/CommandQueue.cpp
   src/sim/Pathfinder.cpp
+  src/sim/AbilitySystem.cpp
+  src/sim/ScoreSystem.cpp
   src/sim/MovementSystem.cpp
   src/sim/CombatSystem.cpp
   src/sim/RegenSystem.cpp
@@ -69,6 +72,8 @@ add_executable(territory_war_tests
   tests/sim_rules_test.cpp
   tests/ai_behavior_test.cpp
   tests/victory_conditions_test.cpp
+  tests/ability_system_test.cpp
+  tests/score_system_test.cpp
   tests/input_command_test.cpp
   tests/renderer_layout_test.cpp
   tests/ui_visual_tuning_test.cpp
@@ -78,3 +83,10 @@ target_include_directories(territory_war_tests PRIVATE include tests)
 target_compile_definitions(territory_war_tests PRIVATE TERRITORY_WAR_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries(territory_war_tests PRIVATE territory_war_core SFML::Graphics SFML::Window SFML::System)
 add_test(NAME territory_war_tests COMMAND territory_war_tests)
+
+install(TARGETS territory_war
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  BUNDLE DESTINATION .
+)
+install(DIRECTORY assets DESTINATION .)
+install(FILES README.md LICENSE DESTINATION .)

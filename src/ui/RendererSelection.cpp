@@ -1,6 +1,7 @@
 #include "game/ui/Renderer.hpp"
 
 #include "RendererDetail.hpp"
+#include "game/sim/AbilitySystem.hpp"
 #include "game/ui/VisualTuning.hpp"
 
 #include <SFML/Graphics/CircleShape.hpp>
@@ -43,16 +44,16 @@ void Renderer::drawSelectionHero(sf::RenderTarget& target, const SelectionLayout
     drawText(target,
              "Each nation bends the same battlefield toward\nspeed, force, attrition, or macro control.",
              {layout.heroRect.position.x + 30.F, layout.heroRect.position.y + 212.F},
-             16,
+             14,
              detail::kTextMuted,
              FontRole::Body,
              false,
              0.98F);
 
     const std::array<std::string, 3> bullets{{
-        "Mouse-first commands. Ratios on 1 / 2 / 3.",
-        "Capitals regenerate faster as territory grows.",
-        "Lose your capital or your entire force and the table is gone.",
+        "Mouse commands. Ratios on 1 / 2 / 3.",
+        "Territory grows capital regeneration.",
+        "Lose your capital or force and you are out.",
     }};
     float bulletY = layout.heroRect.position.y + 314.F;
     for (const auto& bullet : bullets) {
@@ -64,7 +65,7 @@ void Renderer::drawSelectionHero(sf::RenderTarget& target, const SelectionLayout
         drawText(target,
                  bullet,
                  {layout.heroRect.position.x + 54.F, bulletY},
-                 17,
+                 15,
                  detail::kTextPrimary,
                  FontRole::Body);
         bulletY += 42.F;
@@ -134,38 +135,50 @@ void Renderer::drawSelectionNationCards(sf::RenderTarget& target,
         drawText(target,
                  std::string(profile.name),
                  {rect.position.x + 34.F, rect.position.y + 74.F},
-                 30,
+                 28,
                  highlighted ? detail::brighten(detail::kTextPrimary, 1.03F + pulse * 0.02F) : detail::kTextPrimary,
                  FontRole::Display,
                  false,
                  0.94F);
         drawText(target,
                  detail::doctrineLine(nation),
-                 {rect.position.x + 34.F, rect.position.y + 116.F},
-                 15,
+                 {rect.position.x + 34.F, rect.position.y + 110.F},
+                 13,
                  detail::kTextMuted,
+                 FontRole::Body);
+        drawText(target,
+                 std::string(sim::AbilitySystem::passiveLine(nation)),
+                 {rect.position.x + 34.F, rect.position.y + 128.F},
+                 11,
+                 detail::kTextMuted,
+                 FontRole::Body);
+        drawText(target,
+                 std::string(sim::AbilitySystem::activeLine(nation)),
+                 {rect.position.x + 34.F, rect.position.y + 142.F},
+                 11,
+                 detail::kTextPrimary,
                  FontRole::Body);
 
         drawChip(target,
-                 detail::makeRect(rect.position.x + 34.F, rect.position.y + rect.size.y - 98.F, 94.F, 24.F),
+                 detail::makeRect(rect.position.x + 34.F, rect.position.y + rect.size.y - 88.F, 94.F, 20.F),
                  "mob " + std::to_string(profile.mobility).substr(0, 4),
                  detail::withAlpha(nationAccent, 44),
                  detail::kTextPrimary,
                  FontRole::Mono);
         drawChip(target,
-                 detail::makeRect(rect.position.x + 142.F, rect.position.y + rect.size.y - 98.F, 94.F, 24.F),
+                 detail::makeRect(rect.position.x + 142.F, rect.position.y + rect.size.y - 88.F, 94.F, 20.F),
                  "atk " + std::to_string(profile.attack).substr(0, 4),
                  detail::withAlpha(nationAccent, 38),
                  detail::kTextPrimary,
                  FontRole::Mono);
         drawChip(target,
-                 detail::makeRect(rect.position.x + 34.F, rect.position.y + rect.size.y - 66.F, 94.F, 24.F),
+                 detail::makeRect(rect.position.x + 34.F, rect.position.y + rect.size.y - 62.F, 94.F, 20.F),
                  "def " + std::to_string(profile.defense).substr(0, 4),
                  detail::withAlpha(nationAccent, 34),
                  detail::kTextPrimary,
                  FontRole::Mono);
         drawChip(target,
-                 detail::makeRect(rect.position.x + 142.F, rect.position.y + rect.size.y - 66.F, 94.F, 24.F),
+                 detail::makeRect(rect.position.x + 142.F, rect.position.y + rect.size.y - 62.F, 94.F, 20.F),
                  "reg " + std::to_string(profile.regen).substr(0, 4),
                  detail::withAlpha(nationAccent, 30),
                  detail::kTextPrimary,
@@ -173,8 +186,8 @@ void Renderer::drawSelectionNationCards(sf::RenderTarget& target,
 
         drawText(target,
                  "Press " + std::to_string(index + 1) + " or click to deploy this doctrine.",
-                 {rect.position.x + 34.F, rect.position.y + rect.size.y - 34.F},
-                 13,
+                 {rect.position.x + 34.F, rect.position.y + rect.size.y - 22.F},
+                 11,
                  highlighted ? detail::kTextPrimary : detail::kTextMuted,
                  FontRole::Body);
     }
@@ -187,7 +200,7 @@ void Renderer::drawSelectionFooter(sf::RenderTarget& target, const SelectionLayo
               detail::withAlpha(detail::kCore, 220),
               detail::withAlpha(detail::kBorder, 110));
     drawText(target,
-             "Controls: left click select/command | right click or Esc to clear | capitals regenerate with territory held.",
+             "Controls: left click select/command | Space ability | 1/2/3 ratios | right click or Esc clear.",
              {layout.footerRect.position.x + 28.F, layout.footerRect.position.y + 20.F},
              14,
              detail::kTextMuted,

@@ -1,4 +1,5 @@
 #include "game/GameConfig.hpp"
+#include "game/sim/AbilitySystem.hpp"
 #include "game/sim/WorldState.hpp"
 #include "game/ui/InputController.hpp"
 #include "game/ui/Renderer.hpp"
@@ -41,6 +42,9 @@ int main() {
     auto world = game::sim::createInitialWorld(game::NationId::SwiftLeague);
     world.selectedTile = game::sim::TileCoord{1, 1};
     world.hoveredTile = game::sim::TileCoord{9, 6};
+    world.nationStates.at(game::sim::nationIndex(game::NationId::SwiftLeague)).commandPower =
+        game::sim::AbilitySystem::abilityCost(game::NationId::SwiftLeague);
+    static_cast<void>(game::sim::AbilitySystem::activate(world, game::NationId::SwiftLeague));
 
     game::sim::ArmyTransit transit{};
     transit.owner = game::NationId::IronLegion;
@@ -61,6 +65,10 @@ int main() {
 
     world.matchEnded = true;
     world.winner = game::NationId::SwiftLeague;
+    auto& playerStats = world.nationStates.at(game::sim::nationIndex(game::NationId::SwiftLeague)).stats;
+    playerStats.tilesCaptured = 4;
+    playerStats.capitalsCaptured = 1;
+    playerStats.troopsDefeated = 62;
 
     renderTexture.clear();
     renderer.drawGameOver(renderTexture, world);

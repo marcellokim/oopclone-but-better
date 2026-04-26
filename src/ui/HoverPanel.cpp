@@ -1,5 +1,7 @@
 #include "game/ui/HoverPanel.hpp"
 
+#include "game/sim/AbilitySystem.hpp"
+
 #include <iomanip>
 #include <sstream>
 
@@ -40,7 +42,8 @@ std::vector<std::string> buildHoverLines(const sim::WorldState& world,
     if (tile.hasCapital) {
         const float regenRate = config.baseRegenPerSecond +
                                 static_cast<float>(sim::ownedTileCount(world, tile.owner)) * config.territoryRegenFactor *
-                                    nationDefinition(tile.owner).regen;
+                                    nationDefinition(tile.owner).regen +
+                                sim::AbilitySystem::capitalRegenBonus(world, tile.owner);
         std::ostringstream regenStream;
         regenStream << std::fixed << std::setprecision(2) << regenRate;
         lines.push_back("Capital: yes | regen/s " + regenStream.str());

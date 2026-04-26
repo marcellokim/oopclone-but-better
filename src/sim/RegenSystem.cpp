@@ -1,5 +1,7 @@
 #include "game/sim/RegenSystem.hpp"
 
+#include "game/sim/AbilitySystem.hpp"
+
 namespace game::sim::RegenSystem {
 
 void update(WorldState& world, const float deltaSeconds, const MatchConfig& config) {
@@ -17,7 +19,8 @@ void update(WorldState& world, const float deltaSeconds, const MatchConfig& conf
 
         const float regenRate = config.baseRegenPerSecond +
                                 static_cast<float>(ownedTileCount(world, nation)) * config.territoryRegenFactor *
-                                    nationDefinition(nation).regen;
+                                    nationDefinition(nation).regen +
+                                AbilitySystem::capitalRegenBonus(world, nation);
         runtime.regenAccumulator += regenRate * deltaSeconds;
         const int reinforcements = static_cast<int>(runtime.regenAccumulator);
         if (reinforcements > 0) {

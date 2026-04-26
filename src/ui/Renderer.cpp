@@ -187,11 +187,12 @@ Renderer::MatchLayout Renderer::matchLayout(const sim::WorldState& world) const 
     layout.mapShell = detail::makeRect(34.F, 118.F, 856.F, 626.F);
     layout.mapViewport = detail::makeRect(58.F, 142.F, 808.F, 548.F);
     layout.rightRail = detail::makeRect(910.F, 118.F, 336.F, 626.F);
-    layout.commanderPanel = detail::makeRect(926.F, 134.F, 304.F, 106.F);
-    layout.hoverPanel = detail::makeRect(926.F, 256.F, 304.F, 198.F);
-    layout.frontsPanel = detail::makeRect(926.F, 470.F, 304.F, 198.F);
-    layout.objectivePanel = detail::makeRect(926.F, 684.F, 304.F, 44.F);
-    layout.bottomChip = detail::makeRect(90.F, 650.F, 492.F, 74.F);
+    layout.commanderPanel = detail::makeRect(926.F, 134.F, 304.F, 80.F);
+    layout.abilityPanel = detail::makeRect(926.F, 222.F, 304.F, 120.F);
+    layout.hoverPanel = detail::makeRect(926.F, 350.F, 304.F, 124.F);
+    layout.routePreviewPanel = detail::makeRect(926.F, 482.F, 304.F, 66.F);
+    layout.frontsPanel = detail::makeRect(926.F, 556.F, 304.F, 126.F);
+    layout.objectivePanel = detail::makeRect(926.F, 690.F, 304.F, 38.F);
 
     const float availableTileWidth = layout.mapViewport.size.x - 28.F;
     const float availableTileHeight = layout.mapViewport.size.y - 28.F;
@@ -263,6 +264,11 @@ std::optional<sim::TileCoord> Renderer::tileFromPixel(const sim::WorldState& wor
         return std::nullopt;
     }
     return coord;
+}
+
+bool Renderer::abilityPanelFromPixel(const sf::Vector2i pixel) const {
+    const sf::Vector2f point(static_cast<float>(pixel.x), static_cast<float>(pixel.y));
+    return detail::makeRect(926.F, 222.F, 304.F, 120.F).contains(point);
 }
 
 } // namespace game::ui

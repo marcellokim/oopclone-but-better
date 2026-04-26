@@ -1,5 +1,6 @@
 #include "game/ai/AiDirector.hpp"
 
+#include "game/sim/AbilitySystem.hpp"
 #include "game/sim/MovementSystem.hpp"
 
 #include <optional>
@@ -126,7 +127,7 @@ std::optional<Candidate> findBestCandidate(const sim::WorldState& world, const N
 void AiDirector::update(sim::WorldState& world,
                         sim::CommandQueue& queue,
                         const float deltaSeconds,
-                        const MatchConfig&) {
+                        const MatchConfig& config) {
     for (const auto nation : playableNations()) {
         if (nation == world.playerNation) {
             continue;
@@ -136,6 +137,8 @@ void AiDirector::update(sim::WorldState& world,
         if (runtime.eliminated) {
             continue;
         }
+
+        static_cast<void>(sim::AbilitySystem::activateForAi(world, nation, config));
 
         runtime.aiAccumulator += deltaSeconds;
         runtime.commitmentRemaining = std::max(0.F, runtime.commitmentRemaining - deltaSeconds);

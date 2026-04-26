@@ -1,6 +1,7 @@
 #include "game/ui/Renderer.hpp"
 
 #include "RendererDetail.hpp"
+#include "game/sim/ScoreSystem.hpp"
 
 #include <SFML/Graphics/RectangleShape.hpp>
 
@@ -63,15 +64,17 @@ void Renderer::drawGameOverPanel(sf::RenderTarget& target, const sim::WorldState
                  0.96F);
     }
 
+    const auto standings = sim::ScoreSystem::standings(world);
     drawText(target,
-             "Final standings",
+             "Final standings by score",
              {panel.position.x + 30.F, panel.position.y + 204.F},
              20,
              detail::kTextPrimary,
              FontRole::Body);
 
     float rowY = panel.position.y + 232.F;
-    for (const auto nation : playableNations()) {
+    for (const auto& rowData : standings) {
+        const auto nation = rowData.nation;
         const auto rowRect = detail::makeRect(panel.position.x + 28.F, rowY, panel.size.x - 56.F, 38.F);
         sf::RectangleShape row({rowRect.size.x, rowRect.size.y});
         row.setPosition(rowRect.position);
@@ -88,14 +91,20 @@ void Renderer::drawGameOverPanel(sf::RenderTarget& target, const sim::WorldState
                  alive ? nationColor(nation) : detail::kTextMuted,
                  FontRole::Body);
         drawText(target,
-                 std::to_string(sim::ownedTileCount(world, nation)) + " tiles   " +
-                     std::to_string(sim::totalTroops(world, nation)) + " troops",
-                 {rowRect.position.x + 262.F, rowRect.position.y + 9.F},
-                 15,
+                 std::to_string(rowData.score) + " pts   grade " + rowData.grade,
+                 {rowRect.position.x + 218.F, rowRect.position.y + 8.F},
+                 14,
+                 detail::kTextPrimary,
+                 FontRole::Mono);
+        drawText(target,
+                 std::to_string(rowData.ownedTiles) + "t  " + std::to_string(rowData.totalTroops) + "tr  " +
+                     std::to_string(rowData.stats.abilitiesUsed) + "ab",
+                 {rowRect.position.x + 430.F, rowRect.position.y + 10.F},
+                 11,
                  detail::kTextMuted,
                  FontRole::Mono);
         drawText(target,
-                 detail::standingStatus(alive, nation == world.playerNation),
+                 rowData.winner ? "winner" : detail::standingStatus(alive, nation == world.playerNation),
                  {rowRect.position.x + rowRect.size.x - 128.F, rowRect.position.y + 9.F},
                  15,
                  alive ? (nation == world.playerNation ? detail::kAccent : detail::kPositive) : detail::kNegative,

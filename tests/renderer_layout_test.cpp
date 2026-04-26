@@ -125,3 +125,15 @@ TEST_CASE(renderer_match_hit_testing_maps_pixels_to_tiles) {
                        .has_value(),
                   "pixels right of the rendered map should not resolve to a tile");
 }
+
+TEST_CASE(renderer_ability_panel_hit_testing_stays_outside_map) {
+    auto world = game::sim::createInitialWorld(game::NationId::SwiftLeague);
+    game::ui::Renderer renderer;
+
+    test::require(renderer.abilityPanelFromPixel({1060, 282}),
+                  "ability panel center should be clickable for active ability activation");
+    test::require(!renderer.abilityPanelFromPixel({420, 360}),
+                  "map pixels should not be treated as ability-panel clicks");
+    test::require(renderer.tileFromPixel(world, {420, 360}).has_value(),
+                  "map hit-testing should remain active after adding the ability panel");
+}

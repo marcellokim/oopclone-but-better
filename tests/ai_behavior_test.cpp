@@ -1,4 +1,5 @@
 #include "game/ai/AiDirector.hpp"
+#include "game/sim/AbilitySystem.hpp"
 #include "game/sim/WorldState.hpp"
 #include "test_harness.hpp"
 
@@ -43,4 +44,25 @@ TEST_CASE(ai_commitment_window_blocks_immediate_non_emergency_retargeting) {
     ai.update(world, queue, 0.2F);
     const auto secondBurst = queue.drain();
     test::require(secondBurst.empty(), "non-emergency AI should respect the commitment window before retargeting");
+}
+
+TEST_CASE(ai_uses_available_faction_ability_when_tactical_condition_matches) {
+    auto world = game::sim::createInitialWorld(game::NationId::SwiftLeague);
+    auto capital = game::sim::capitalOf(world, game::NationId::BastionDirectorate);
+    auto threatened = game::sim::neighbors(world, capital).front();
+    game::sim::tileAt(world, threatened).owner = game::NationId::IronLegion;
+    game::sim::tileAt(world, threatened).troops = 40;
+    auto& skku = world.nationStates.at(game::sim::nationIndex(game::NationId::BastionDirectorate));
+    skku.commandPower = game::sim::AbilitySystem::abilityCost(game::NationId::BastionDirectorate);
+
+    game::ai::AiDirector ai;
+    game::sim::CommandQueue queue;
+    ai.update(world, queue, 1.0F);
+
+    test::require(skku.stats.abilitiesUsed == 1,
+                  "AI should spend available command power on a matching faction ability");
+    test::require(skku.abilityActiveRemaining > 0.F,
+                  "AI ability activation should start the faction active window");
+    test::require(skku.commandPower == 0.F,
+                  "AI ability activation should spend command power");
 }

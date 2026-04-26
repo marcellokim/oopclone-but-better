@@ -1,6 +1,7 @@
 #include "game/ui/Renderer.hpp"
 
 #include "RendererDetail.hpp"
+#include "game/sim/AbilitySystem.hpp"
 #include "game/sim/Pathfinder.hpp"
 #include "game/ui/VisualTuning.hpp"
 
@@ -8,6 +9,8 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/Clock.hpp>
 
+#include <algorithm>
+#include <cmath>
 #include <iomanip>
 #include <limits>
 #include <sstream>
@@ -55,8 +58,12 @@ std::string routePreviewSummary(const sim::WorldState& world) {
         return "No land route available. Sea tiles block this corridor.";
     }
 
-    return std::to_string(path.size() - 1) + " hops | " + formatMultiplier(pathSpeedMultiplier(world, path)) +
-           "x speed | cap " + std::to_string(pathThroughputCap(world, path));
+    const auto& originTile = sim::tileAt(world, *world.selectedTile);
+    const float speed = pathSpeedMultiplier(world, path) *
+                        sim::AbilitySystem::movementSpeedMultiplier(world, originTile.owner, path);
+    const int cap = pathThroughputCap(world, path) + sim::AbilitySystem::launchCapBonus(world, originTile.owner, path);
+    return std::to_string(path.size() - 1) + " hops | " + formatMultiplier(speed) + "x speed | cap " +
+           std::to_string(cap);
 }
 
 } // namespace
@@ -70,10 +77,11 @@ void Renderer::drawMatch(sf::RenderTarget& target,
     drawMatchMap(target, layout, world);
     drawActiveTransits(target, layout, world);
     drawCommanderPanel(target, layout, world, inputController);
+    drawAbilityPanel(target, layout, world);
     drawHoverPanel(target, layout, world);
+    drawCommandPreview(target, layout, world);
     drawFrontsPanel(target, layout, world);
     drawObjectivePanel(target, layout);
-    drawCommandPreview(target, layout, world);
 }
 
 void Renderer::drawMatchTopStrip(sf::RenderTarget& target,
@@ -115,9 +123,15 @@ void Renderer::drawMatchTopStrip(sf::RenderTarget& target,
              detail::kTextPrimary,
              FontRole::Mono);
     drawChip(target,
-             detail::makeRect(layout.topStrip.position.x + 878.F, layout.topStrip.position.y + 20.F, 338.F, 34.F),
-             "terrain: sea blocks land routes / mountains slow + bottleneck",
+             detail::makeRect(layout.topStrip.position.x + 878.F, layout.topStrip.position.y + 20.F, 206.F, 34.F),
+             "Space ability",
              detail::withAlpha(sf::Color(79, 100, 128), 42),
+             detail::kTextPrimary,
+             FontRole::Body);
+    drawChip(target,
+             detail::makeRect(layout.topStrip.position.x + 1098.F, layout.topStrip.position.y + 20.F, 118.F, 34.F),
+             "hover route",
+             detail::withAlpha(sf::Color(79, 100, 128), 34),
              detail::kTextPrimary,
              FontRole::Body);
 }
@@ -316,18 +330,96 @@ void Renderer::drawCommanderPanel(sf::RenderTarget& target,
              1.16F);
     drawText(target,
              detail::compactNationName(world.playerNation),
-             {layout.commanderPanel.position.x + 18.F, layout.commanderPanel.position.y + 46.F},
-             22,
+             {layout.commanderPanel.position.x + 18.F, layout.commanderPanel.position.y + 42.F},
+             19,
              nationColor(world.playerNation),
              FontRole::Display,
              false,
              0.95F);
     drawText(target,
-             "Send ratio  " + inputController.sendRatioLabel() + "   |   right click to clear",
-             {layout.commanderPanel.position.x + 18.F, layout.commanderPanel.position.y + 78.F},
-             15,
+             "Ratio " + inputController.sendRatioLabel() + " | right click clear",
+             {layout.commanderPanel.position.x + 18.F, layout.commanderPanel.position.y + 64.F},
+             12,
              detail::kTextMuted,
              FontRole::Body);
+}
+
+void Renderer::drawAbilityPanel(sf::RenderTarget& target, const MatchLayout& layout, const sim::WorldState& world) const {
+    const auto nation = world.playerNation;
+    const auto& runtime = world.nationStates.at(sim::nationIndex(nation));
+    const float cost = sim::AbilitySystem::abilityCost(nation);
+    const float cpRatio = std::clamp(runtime.commandPower / sim::AbilitySystem::maxCommandPower(), 0.F, 1.F);
+    const bool ready = runtime.commandPower + 0.001F >= cost && runtime.abilityCooldownRemaining <= 0.F;
+
+    drawPanel(target,
+              layout.abilityPanel,
+              detail::withAlpha(detail::kShell, 244),
+              detail::withAlpha(detail::kCore, 242),
+              ready ? detail::withAlpha(detail::kAccent, 170) : detail::withAlpha(detail::kBorder, 140),
+              ready);
+    drawText(target,
+             "ABILITY",
+             {layout.abilityPanel.position.x + 18.F, layout.abilityPanel.position.y + 15.F},
+             12,
+             detail::kAccent,
+             FontRole::Mono,
+             false,
+             1.16F);
+    drawText(target,
+             std::string(sim::AbilitySystem::abilityName(nation)),
+             {layout.abilityPanel.position.x + 18.F, layout.abilityPanel.position.y + 36.F},
+             19,
+             nationColor(nation),
+             FontRole::Display,
+             false,
+             0.95F);
+    drawText(target,
+             std::string(sim::AbilitySystem::activeLine(nation)),
+             {layout.abilityPanel.position.x + 18.F, layout.abilityPanel.position.y + 58.F},
+             10,
+             detail::kTextMuted,
+             FontRole::Body);
+
+    const auto barRect = detail::makeRect(layout.abilityPanel.position.x + 18.F,
+                                          layout.abilityPanel.position.y + 82.F,
+                                          layout.abilityPanel.size.x - 36.F,
+                                          12.F);
+    sf::RectangleShape barBack({barRect.size.x, barRect.size.y});
+    barBack.setPosition(barRect.position);
+    barBack.setFillColor(detail::withAlpha(sf::Color(8, 11, 16), 190));
+    barBack.setOutlineThickness(1.F);
+    barBack.setOutlineColor(detail::withAlpha(sf::Color::White, 50));
+    target.draw(barBack);
+
+    sf::RectangleShape barFill({barRect.size.x * cpRatio, barRect.size.y});
+    barFill.setPosition(barRect.position);
+    barFill.setFillColor(detail::withAlpha(ready ? detail::kAccent : nationColor(nation), 190));
+    target.draw(barFill);
+
+    std::string status = "CP " + std::to_string(static_cast<int>(runtime.commandPower)) + "/" +
+                         std::to_string(static_cast<int>(sim::AbilitySystem::maxCommandPower()));
+    if (runtime.abilityActiveRemaining > 0.F) {
+        status += " | active " + std::to_string(static_cast<int>(std::ceil(runtime.abilityActiveRemaining))) + "s";
+    } else if (runtime.abilityCooldownRemaining > 0.F) {
+        status += " | cd " + std::to_string(static_cast<int>(std::ceil(runtime.abilityCooldownRemaining))) + "s";
+    } else {
+        status += ready ? " | Space ready" : " | build power";
+    }
+    drawText(target,
+             status,
+             {layout.abilityPanel.position.x + 18.F, layout.abilityPanel.position.y + 100.F},
+             11,
+             ready ? detail::kTextPrimary : detail::kTextMuted,
+             FontRole::Mono);
+
+    if (!runtime.abilityNotice.empty()) {
+        drawText(target,
+                 runtime.abilityNotice,
+                 {layout.abilityPanel.position.x + 18.F, layout.abilityPanel.position.y + 112.F},
+                 10,
+                 detail::kAccent,
+                 FontRole::Body);
+    }
 }
 
 void Renderer::drawHoverPanel(sf::RenderTarget& target, const MatchLayout& layout, const sim::WorldState& world) const {
@@ -348,15 +440,15 @@ void Renderer::drawHoverPanel(sf::RenderTarget& target, const MatchLayout& layou
     const auto hoverLines = world.hoveredTile
                                 ? buildHoverLines(world, *world.hoveredTile)
                                 : std::vector<std::string>{"Hover a tile to inspect owner, troops, terrain, move speed, and launch caps."};
-    float hoverY = layout.hoverPanel.position.y + 54.F;
+    float hoverY = layout.hoverPanel.position.y + 38.F;
     for (const auto& line : hoverLines) {
         drawText(target,
                  line,
                  {layout.hoverPanel.position.x + 18.F, hoverY},
-                 15,
+                 12,
                  detail::kTextPrimary,
                  FontRole::Body);
-        hoverY += 28.F;
+        hoverY += 20.F;
     }
 }
 
@@ -375,14 +467,14 @@ void Renderer::drawFrontsPanel(sf::RenderTarget& target, const MatchLayout& layo
              false,
              1.16F);
 
-    float frontY = layout.frontsPanel.position.y + 54.F;
+    float frontY = layout.frontsPanel.position.y + 38.F;
     for (const auto nation : playableNations()) {
         const bool alive = !world.nationStates.at(sim::nationIndex(nation)).eliminated;
         const bool player = nation == world.playerNation;
         const auto panelRect = detail::makeRect(layout.frontsPanel.position.x + 14.F,
                                                 frontY,
                                                 layout.frontsPanel.size.x - 28.F,
-                                                32.F);
+                                                18.F);
         sf::RectangleShape strip({panelRect.size.x, panelRect.size.y});
         strip.setPosition(panelRect.position);
         strip.setFillColor(detail::withAlpha(detail::mix(detail::kCore, nationColor(nation), alive ? 0.18F : 0.05F), 210));
@@ -391,24 +483,24 @@ void Renderer::drawFrontsPanel(sf::RenderTarget& target, const MatchLayout& layo
         target.draw(strip);
         drawText(target,
                  detail::compactNationName(nation),
-                 {panelRect.position.x + 12.F, panelRect.position.y + 5.F},
-                 13,
+                 {panelRect.position.x + 8.F, panelRect.position.y + 3.F},
+                 10,
                  alive ? detail::kTextPrimary : detail::kTextMuted,
                  FontRole::Body);
         drawText(target,
-                 "tiles " + std::to_string(sim::ownedTileCount(world, nation)) + " | troops " +
+                 "t" + std::to_string(sim::ownedTileCount(world, nation)) + " / " +
                      std::to_string(sim::totalTroops(world, nation)),
-                 {panelRect.position.x + 12.F, panelRect.position.y + 17.F},
-                 10,
+                 {panelRect.position.x + 92.F, panelRect.position.y + 3.F},
+                 9,
                  detail::kTextMuted,
                  FontRole::Mono);
         drawChip(target,
-                 detail::makeRect(panelRect.position.x + panelRect.size.x - 66.F, panelRect.position.y + 5.F, 56.F, 15.F),
+                 detail::makeRect(panelRect.position.x + panelRect.size.x - 54.F, panelRect.position.y + 3.F, 46.F, 12.F),
                  detail::compactStandingStatus(alive, player),
                  detail::withAlpha(alive ? (player ? detail::kAccent : detail::kPositive) : detail::kNegative, 42),
                  alive ? (player ? detail::kAccent : detail::kPositive) : detail::kNegative,
                  FontRole::Mono);
-        frontY += 36.F;
+        frontY += 20.F;
     }
 }
 
@@ -420,16 +512,16 @@ void Renderer::drawObjectivePanel(sf::RenderTarget& target, const MatchLayout& l
               detail::withAlpha(detail::kBorder, 140));
     drawText(target,
              "OBJECTIVE",
-             {layout.objectivePanel.position.x + 18.F, layout.objectivePanel.position.y + 14.F},
-             12,
+             {layout.objectivePanel.position.x + 18.F, layout.objectivePanel.position.y + 10.F},
+             10,
              detail::kAccent,
              FontRole::Mono,
              false,
              1.16F);
     drawText(target,
-             "Hold capital. Take capitals. Erase force.",
-             {layout.objectivePanel.position.x + 18.F, layout.objectivePanel.position.y + 26.F},
-             10,
+             "Hold capital. Take capitals.",
+             {layout.objectivePanel.position.x + 104.F, layout.objectivePanel.position.y + 10.F},
+             9,
              detail::kTextMuted,
              FontRole::Body);
 }
@@ -438,28 +530,28 @@ void Renderer::drawCommandPreview(sf::RenderTarget& target,
                                   const MatchLayout& layout,
                                   const sim::WorldState& world) const {
     drawPanel(target,
-              layout.bottomChip,
+              layout.routePreviewPanel,
               detail::withAlpha(detail::kShell, 240),
               detail::withAlpha(detail::kCore, 238),
               detail::withAlpha(detail::kBorder, 135));
     drawText(target,
-             "COMMAND PREVIEW",
-             {layout.bottomChip.position.x + 18.F, layout.bottomChip.position.y + 18.F},
-             13,
+             "ROUTE PREVIEW",
+             {layout.routePreviewPanel.position.x + 18.F, layout.routePreviewPanel.position.y + 15.F},
+             12,
              detail::kAccent,
              FontRole::Mono,
              false,
              1.16F);
     drawText(target,
              detail::selectedTileSummary(world),
-             {layout.bottomChip.position.x + 18.F, layout.bottomChip.position.y + 38.F},
-             14,
+             {layout.routePreviewPanel.position.x + 18.F, layout.routePreviewPanel.position.y + 32.F},
+             9,
              detail::kTextPrimary,
              FontRole::Body);
     drawText(target,
              routePreviewSummary(world),
-             {layout.bottomChip.position.x + 18.F, layout.bottomChip.position.y + 58.F},
-             12,
+             {layout.routePreviewPanel.position.x + 18.F, layout.routePreviewPanel.position.y + 50.F},
+             10,
              detail::kTextMuted,
              FontRole::Body);
 }

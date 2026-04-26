@@ -25,6 +25,7 @@ class Renderer {
 
     [[nodiscard]] std::optional<NationId> selectionFromPixel(sf::Vector2i pixel) const;
     [[nodiscard]] std::optional<sim::TileCoord> tileFromPixel(const sim::WorldState& world, sf::Vector2i pixel) const;
+    [[nodiscard]] bool abilityPanelFromPixel(sf::Vector2i pixel) const;
 
   private:
     enum class FontRole {
@@ -47,10 +48,11 @@ class Renderer {
         float tileSize{0.F};
         sf::FloatRect rightRail{};
         sf::FloatRect commanderPanel{};
+        sf::FloatRect abilityPanel{};
         sf::FloatRect hoverPanel{};
         sf::FloatRect frontsPanel{};
         sf::FloatRect objectivePanel{};
-        sf::FloatRect bottomChip{};
+        sf::FloatRect routePreviewPanel{};
     };
 
     [[nodiscard]] SelectionLayout selectionLayout() const;
@@ -99,6 +101,7 @@ class Renderer {
                             const MatchLayout& layout,
                             const sim::WorldState& world,
                             const InputController& inputController) const;
+    void drawAbilityPanel(sf::RenderTarget& target, const MatchLayout& layout, const sim::WorldState& world) const;
     void drawHoverPanel(sf::RenderTarget& target, const MatchLayout& layout, const sim::WorldState& world) const;
     void drawFrontsPanel(sf::RenderTarget& target, const MatchLayout& layout, const sim::WorldState& world) const;
     void drawObjectivePanel(sf::RenderTarget& target, const MatchLayout& layout) const;

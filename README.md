@@ -10,14 +10,16 @@ C++20 + SFML 3 기반으로 제작되었고, 4개 대학 테마 진영의 비대
 - 수도 리젠 / 영토 비례 강화
 - 바다 차단 / 산악 병목 / 도로 고속로가 포함된 수제 맵
 - AI 상대 3개 국가 동시 진행
+- Command Power 기반 진영별 액티브 / 패시브 고유기
+- 경기 종료 후 점수 / 등급 기반 debrief
 - 단계별 UI 리디자인 및 phase-2 polish 반영 완료
 
 ## 핵심 특징
 - **4개 대학 진영 비대칭**
-  - Sogang Univ.: 템포 중심 정밀 돌파
-  - Hanyang Univ.: 도로 장악과 압박 전개
-  - Sungkyunkwan Univ.: 안정적 수비와 장기 운영
-  - Chung-Ang Univ.: 중앙 거점 기반 유연한 대응
+  - Sogang Univ.: `Tempo Surge`로 빠른 전개와 launch cap 보정
+  - Hanyang Univ.: `Road Authority`로 도로 기반 전술 기동 강화
+  - Sungkyunkwan Univ.: `Fortified Basin`으로 거점 방어와 수도 리젠 강화
+  - Chung-Ang Univ.: `Adaptive Reserve`로 위협받는 전선 즉시 보강
 - **실시간 타일 전장**
   - 내 타일 선택 → 아군/적 타일 클릭으로 명령
 - **지형 병목 규칙**
@@ -28,13 +30,15 @@ C++20 + SFML 3 기반으로 제작되었고, 4개 대학 테마 진영의 비대
 - **결정론적 시뮬레이션 코어**
   - 테스트 가능한 fixed-tick 구조
 - **SFML 기반 전술형 UI**
-  - nation select / 전장 HUD / debrief 화면 포함
+  - nation select / 전장 HUD / ability panel / score debrief 화면 포함
 
 ## 조작법
 - **좌클릭**: 타일 선택 / 명령
 - **우클릭**: 선택 해제
 - **Esc**: 선택 해제
 - **1 / 2 / 3**: 병력 전송 비율 25% / 50% / 100%
+- **Space**: Command Power가 충분할 때 현재 진영 고유기 발동
+- **Ability panel 클릭**: Space와 동일하게 고유기 발동
 - **Enter 또는 좌클릭**: 결과 화면에서 nation select로 복귀
 
 ## 빌드
@@ -42,6 +46,50 @@ C++20 + SFML 3 기반으로 제작되었고, 4개 대학 테마 진영의 비대
 - C++20 지원 컴파일러
 - CMake 3.24+
 - GitHub 접근 가능 네트워크 환경 (SFML을 `FetchContent`로 받아옴)
+
+## 처음 실행 / 원클릭 실행
+
+macOS:
+1. 저장소를 다운로드하거나 clone합니다.
+2. Finder에서 `Play.command`를 더블클릭합니다.
+3. 처음 실행 시 macOS가 보안 확인을 요구하면 Terminal에서 아래 명령으로 실행합니다.
+
+```bash
+./Play.command
+```
+
+Windows:
+1. 저장소를 다운로드하거나 clone합니다.
+2. PowerShell에서 아래 명령을 실행합니다.
+
+```powershell
+.\Play.ps1
+```
+
+공통 동작:
+- CMake configure/build를 자동으로 수행합니다.
+- 최초 실행은 SFML을 내려받고 컴파일하므로 시간이 걸릴 수 있습니다.
+- 빌드가 끝나면 `territory_war`를 바로 실행합니다.
+
+검증까지 함께 실행:
+
+```bash
+./tools/bootstrap_and_run.sh --test
+```
+
+로컬 설치 복사본 생성:
+
+```bash
+./tools/bootstrap_and_run.sh --install --no-run
+```
+
+생성 위치:
+- `dist/territory-war/`
+
+설치형 실행 스크립트는 CMake와 C++20 컴파일러가 이미 설치되어 있다고 가정합니다.
+macOS에서는 Xcode Command Line Tools, Windows에서는 Visual Studio Build Tools 또는 동등한 C++ toolchain이 필요합니다.
+
+## 수동 빌드
 
 ```bash
 cmake -S . -B build
