@@ -47,23 +47,27 @@ C++20 + SFML 3 기반으로 제작되었고, 4개 대학 테마 진영의 비대
 - CMake 3.24+
 - GitHub 접근 가능 네트워크 환경 (SFML을 `FetchContent`로 받아옴)
 
-## 처음 실행 / 원클릭 실행
+## 가장 간편한 배포
 
-macOS:
-1. 저장소를 다운로드하거나 clone합니다.
-2. Finder에서 `Play.command`를 더블클릭합니다.
-3. 처음 실행 시 macOS가 보안 확인을 요구하면 Terminal에서 아래 명령으로 실행합니다.
+배포하는 사람은 한 번만 실행합니다.
+
+```bash
+./tools/package_portable.sh --test
+```
+
+생성 파일:
+- `dist/TerritoryWar-macOS-arm64.zip` 같은 OS/CPU별 ZIP
+
+플레이어는 ZIP을 풀고 `Play.command`를 더블클릭하면 됩니다. Git clone, CMake 명령 입력, 빌드 폴더 이동이 필요 없습니다.
+
+macOS가 처음 실행을 막으면 `Play.command`를 우클릭한 뒤 `열기`를 선택합니다.
+
+## 소스에서 바로 실행
+
+개발 중에는 저장소 루트에서 `Play.command`를 더블클릭하거나 아래 명령을 실행합니다.
 
 ```bash
 ./Play.command
-```
-
-Windows:
-1. 저장소를 다운로드하거나 clone합니다.
-2. PowerShell에서 아래 명령을 실행합니다.
-
-```powershell
-.\Play.ps1
 ```
 
 공통 동작:
